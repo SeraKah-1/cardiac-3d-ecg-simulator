@@ -120,9 +120,29 @@ export class ThalerPdfExportEngine {
     doc.setFontSize(7.5);
     doc.text(t.physicianHeader, 215, footerY + 5);
     doc.line(215, footerY + 20, 275, footerY + 20);
-    doc.text(t.cardiologistTitle, 215, footerY + 24);
+    this.savePdfSafely(doc, `EKG_${caseData.caseCode}_${caseData.patient.name.replace(/\s+/g, '_')}.pdf`);
+  }
 
-    doc.save(`EKG_${caseData.caseCode}_${caseData.patient.name.replace(/\s+/g, '_')}.pdf`);
+  private static savePdfSafely(doc: jsPDF, filename: string): void {
+    try {
+      const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '');
+      if (isMobile && typeof navigator.share === 'function' && typeof File !== 'undefined') {
+        const blob = doc.output('blob');
+        const file = new File([blob], filename, { type: 'application/pdf' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: filename,
+          }).catch(() => {
+            doc.save(filename);
+          });
+          return;
+        }
+      }
+    } catch {
+      // Fallback if File or navigator.share throws
+    }
+    doc.save(filename);
   }
 
   /**
@@ -266,7 +286,7 @@ export class ThalerPdfExportEngine {
           ? `OSCE_Worksheet_ECG_Patient_${caseData.patient.gender}_${caseData.patient.age}yo.pdf`
           : `Lembar_Kerja_OSCE_EKG_Pasien_${caseData.patient.gender === 'Male' ? 'Pria' : 'Wanita'}_${caseData.patient.age}th.pdf`)
       : (locale === 'en' ? 'OSCE_Worksheet_ECG_Practice.pdf' : 'Lembar_Kerja_OSCE_EKG_Latihan.pdf');
-    doc.save(sanitizedFileName);
+    this.savePdfSafely(doc, sanitizedFileName);
   }
 
   /**
@@ -431,7 +451,8 @@ export class ThalerPdfExportEngine {
       });
     }
 
-    doc.save(
+    this.savePdfSafely(
+      doc,
       locale === 'en'
         ? `Evaluation_Report_${caseData.caseCode}_Score_${score}.pdf`
         : `Hasil_Evaluasi_${caseData.caseCode}_Skor_${score}.pdf`

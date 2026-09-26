@@ -394,13 +394,19 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     };
   }, [camera]);
 
-  // Caliper Mouse Handlers with zoom-immune coordinate scaling and dragging state
-  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Caliper Pointer Handlers (Unified Touch, Mouse, and Stylus with Zoom-Immune Coordinates)
+  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isCaliperActive) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignored if capture unsupported
+    }
 
     const x = ((e.clientX - rect.left) / rect.width) * CANVAS_WIDTH_PX;
     const y = ((e.clientY - rect.top) / rect.height) * CANVAS_HEIGHT_PX;
@@ -411,7 +417,7 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     setCaliperResult(null);
   };
 
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isCaliperActive || !isDraggingCaliper || !caliperStart) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -445,8 +451,22 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     setCaliperResult({ mmX, mmY, sec, mv });
   };
 
-  const handleCanvasMouseUp = () => {
+  const handleCanvasPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // Ignored
+    }
     setIsDraggingCaliper(false);
+  };
+
+  // Double tap / click to toggle zoom on mobile and desktop
+  const handleCanvasDoubleClick = () => {
+    if (camera.zoomLevel >= 1.6) {
+      onResetCamera();
+    } else if (onZoomToFeature) {
+      onZoomToFeature();
+    }
   };
 
   // Keyboard shortcut: Z key toggles zoom (guarded against active form inputs)
@@ -563,13 +583,15 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
             ref={canvasRef}
             width={CANVAS_WIDTH_PX}
             height={CANVAS_HEIGHT_PX}
-            onMouseDown={handleCanvasMouseDown}
-            onMouseMove={handleCanvasMouseMove}
-            onMouseUp={handleCanvasMouseUp}
-            onMouseLeave={handleCanvasMouseUp}
+            onPointerDown={handleCanvasPointerDown}
+            onPointerMove={handleCanvasPointerMove}
+            onPointerUp={handleCanvasPointerUp}
+            onPointerCancel={handleCanvasPointerUp}
+            onDoubleClick={handleCanvasDoubleClick}
             className="block w-full h-full object-contain rounded-xs border border-stone-300"
             style={{
               imageRendering: 'crisp-edges',
+              touchAction: 'none',
             }}
           />
         </div>

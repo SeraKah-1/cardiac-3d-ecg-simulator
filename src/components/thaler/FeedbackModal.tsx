@@ -157,7 +157,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl border border-stone-200 w-full max-w-lg flex flex-col overflow-hidden text-stone-800"
+        className="bg-white rounded-xl shadow-2xl border border-stone-200 w-full max-w-lg max-h-[90dvh] flex flex-col overflow-hidden text-stone-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}
@@ -288,7 +288,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
                   placeholder={t.feedback.commentsPlaceholder}
-                  className="w-full bg-white border border-stone-300 rounded-lg p-2.5 text-xs text-stone-900 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 placeholder:text-stone-400"
+                  className="w-full bg-white border border-stone-300 rounded-lg p-2.5 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 placeholder:text-stone-400"
                 />
               </div>
 
@@ -305,7 +305,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   value={userContact}
                   onChange={(e) => setUserContact(e.target.value)}
                   placeholder={t.feedback.contactPlaceholder}
-                  className="w-full bg-white border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs text-stone-900 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 placeholder:text-stone-400"
+                  className="w-full bg-white border border-stone-300 rounded-lg px-2.5 py-1.5 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 placeholder:text-stone-400"
                 />
               </div>
 

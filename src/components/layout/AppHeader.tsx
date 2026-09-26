@@ -18,6 +18,8 @@ import {
   Monitor,
   Columns,
   Globe,
+  Menu,
+  X,
 } from 'lucide-react';
 
 interface AppHeaderProps {
@@ -35,6 +37,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const { locale, toggleLocale, t } = useLocale();
   const [showPatientPopover, setShowPatientPopover] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const activePresetId = useSimulationStore((s) => s.activePresetId);
   const loadPreset = useSimulationStore((s) => s.loadPreset);
@@ -139,8 +142,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           )}
         </div>
 
-        {/* 3-Mode Dedicated Workspace Segmented Control */}
-        <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+        {/* 3-Mode Dedicated Workspace Segmented Control (Desktop md+) */}
+        <div className="hidden md:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
           <button
             onClick={() => setWorkspaceMode('exploration')}
             className={`flex items-center space-x-1 px-2 py-1 rounded-md font-bold text-[11px] transition ${
@@ -184,7 +187,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* 2. Center Zone: Streamlined 2-Second Idiograph Triage Pill (Guaranteed >= 250-400px visible space) */}
+      {/* 2. Center Zone: Streamlined 2-Second Idiograph Triage Pill */}
       <div className="flex-1 flex items-center justify-center min-w-0 px-1 sm:px-2">
         <div
           className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 rounded-full border shadow-2xs min-w-0 max-w-[440px] w-auto ${triageBadgeConfig.pillBg}`}
@@ -206,70 +209,295 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* 3. Right Zone: Audio, Slide-Over Drawer button ('Klinis'), Tutorial EKG, Print PDF & Locale Switcher */}
+      {/* 3. Right Zone: Desktop Actions (hidden on mobile) & Mobile Hamburger */}
       <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
-        {/* Audio Mute/Unmute */}
-        <button
-          onClick={handleAudioToggle}
-          className={`p-1.5 rounded-lg border transition ${
-            audioMuted
-              ? 'bg-slate-100 text-slate-400 border-slate-200'
-              : 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100'
-          }`}
-          title={audioMuted ? t.appHeader.unmuteAudio : t.appHeader.muteAudio}
-        >
-          {audioMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-        </button>
+        {/* Desktop Buttons (md+) */}
+        <div className="hidden md:flex items-center space-x-1 sm:space-x-1.5">
+          {/* Audio Mute/Unmute */}
+          <button
+            onClick={handleAudioToggle}
+            className={`p-1.5 rounded-lg border transition ${
+              audioMuted
+                ? 'bg-slate-100 text-slate-400 border-slate-200'
+                : 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100'
+            }`}
+            title={audioMuted ? t.appHeader.unmuteAudio : t.appHeader.muteAudio}
+          >
+            {audioMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
 
-        {/* Clinical Slide-Over Drawer Toggle ('Klinis' / 'Clinical') */}
-        <button
-          onClick={onToggleInspector}
-          className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-bold border transition ${
-            isInspectorOpen
-              ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-          }`}
-          title={t.appHeader.toggleInspector}
-        >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{t.appHeader.inspectorButton}</span>
-        </button>
+          {/* Clinical Slide-Over Drawer Toggle */}
+          <button
+            onClick={onToggleInspector}
+            className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-bold border transition ${
+              isInspectorOpen
+                ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+            }`}
+            title={t.appHeader.toggleInspector}
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{t.appHeader.inspectorButton}</span>
+          </button>
 
-        {/* 12-Lead ECG Tutorial Workstation Button */}
+          {/* 12-Lead ECG Tutorial Workstation Button */}
+          {onOpenThalerAcademy && (
+            <button
+              onClick={onOpenThalerAcademy}
+              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+              title={t.appHeader.tutorialTooltip}
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span className="hidden lg:inline">{t.appHeader.tutorialButton}</span>
+              <span className="lg:hidden">{t.appHeader.tutorialShort}</span>
+            </button>
+          )}
+
+          {/* Export Vector PDF */}
+          <button
+            onClick={onExportPdf}
+            className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+            title={t.appHeader.printPdfTooltip}
+          >
+            <FileDown className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{t.appHeader.printPdf}</span>
+          </button>
+
+          {/* Global Locale Switcher Toggle (ID / EN) */}
+          <button
+            onClick={toggleLocale}
+            className="flex items-center space-x-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-mono font-bold text-slate-700 transition cursor-pointer"
+            title={locale === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+          >
+            <Globe className="w-3 h-3 text-slate-500 shrink-0" />
+            <span className={locale === 'id' ? 'text-sky-600 font-black' : 'text-slate-400'}>ID</span>
+            <span className="text-slate-300">/</span>
+            <span className={locale === 'en' ? 'text-sky-600 font-black' : 'text-slate-400'}>EN</span>
+          </button>
+        </div>
+
+        {/* Mobile Quick Tutorial Button (Compact) */}
         {onOpenThalerAcademy && (
           <button
             onClick={onOpenThalerAcademy}
-            className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+            className="md:hidden flex items-center p-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold shadow-xs"
             title={t.appHeader.tutorialTooltip}
           >
-            <Activity className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">{t.appHeader.tutorialButton}</span>
-            <span className="md:hidden">{t.appHeader.tutorialShort}</span>
+            <Activity className="w-4 h-4" />
           </button>
         )}
 
-        {/* Export Vector PDF */}
+        {/* Mobile Hamburger Menu Button (< md) */}
         <button
-          onClick={onExportPdf}
-          className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
-          title={t.appHeader.printPdfTooltip}
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="md:hidden p-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition"
+          aria-label="Open mobile navigation menu"
         >
-          <FileDown className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{t.appHeader.printPdf}</span>
-        </button>
-
-        {/* Global Locale Switcher Toggle (ID / EN) */}
-        <button
-          onClick={toggleLocale}
-          className="flex items-center space-x-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-mono font-bold text-slate-700 transition cursor-pointer"
-          title={locale === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
-        >
-          <Globe className="w-3 h-3 text-slate-500 shrink-0" />
-          <span className={locale === 'id' ? 'text-sky-600 font-black' : 'text-slate-400'}>ID</span>
-          <span className="text-slate-300">/</span>
-          <span className={locale === 'en' ? 'text-sky-600 font-black' : 'text-slate-400'}>EN</span>
+          <Menu className="w-5 h-5" />
         </button>
       </div>
+
+      {/* Mobile Slide-Over Navigation Sheet */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-50 flex md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" />
+
+          {/* Slide-over Content Drawer */}
+          <div
+            className="relative ml-auto w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 overflow-hidden text-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div className="h-14 px-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-sky-600 to-rose-600 flex items-center justify-center">
+                  <Heart className="w-3.5 h-3.5 text-white fill-white" />
+                </div>
+                <span className="font-bold text-sm tracking-tight text-slate-900">CardioSim 3D</span>
+              </div>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Drawer Body */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+              {/* Patient Case Dossier */}
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                <div className="flex items-center justify-between font-bold text-slate-900">
+                  <span>{patient.name}, {patient.age}{t.appHeader.yearsOldSuffix}</span>
+                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-sky-100 text-sky-700">{patient.id}</span>
+                </div>
+                <div className="text-[11px] text-slate-600">
+                  <span className="font-semibold">{t.appHeader.genderLabel}</span> {patient.gender}
+                </div>
+                <div className="text-[11px] text-slate-600">
+                  <span className="font-semibold">{t.appHeader.historyLabel}</span> {patient.history}
+                </div>
+              </div>
+
+              {/* Workspace View Mode */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  {locale === 'en' ? 'Workspace Mode' : 'Mode Tampilan'}
+                </label>
+                <div className="grid grid-cols-1 gap-1.5">
+                  <button
+                    onClick={() => {
+                      setWorkspaceMode('exploration');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center space-x-2.5 p-2.5 rounded-lg border text-left transition ${
+                      workspaceMode === 'exploration'
+                        ? 'bg-sky-50 border-sky-400 text-sky-800 font-bold shadow-2xs'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Layers className="w-4 h-4 text-sky-600 shrink-0" />
+                    <div>
+                      <div className="text-xs font-bold">{t.appHeader.mode3D}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">{t.appHeader.mode3DTooltip}</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setWorkspaceMode('monitor');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center space-x-2.5 p-2.5 rounded-lg border text-left transition ${
+                      workspaceMode === 'monitor'
+                        ? 'bg-emerald-50 border-emerald-400 text-emerald-800 font-bold shadow-2xs'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Monitor className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div>
+                      <div className="text-xs font-bold">{t.appHeader.mode12L}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">{t.appHeader.mode12LTooltip}</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setWorkspaceMode('integrated');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center space-x-2.5 p-2.5 rounded-lg border text-left transition ${
+                      workspaceMode === 'integrated'
+                        ? 'bg-purple-50 border-purple-400 text-purple-800 font-bold shadow-2xs'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Columns className="w-4 h-4 text-purple-600 shrink-0" />
+                    <div>
+                      <div className="text-xs font-bold">{t.appHeader.modeSplit}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">{t.appHeader.modeSplitTooltip}</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tools & Modules */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  {locale === 'en' ? 'Actions & Tools' : 'Alat & Modul'}
+                </label>
+
+                {onOpenThalerAcademy && (
+                  <button
+                    onClick={() => {
+                      onOpenThalerAcademy();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between p-2.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold transition shadow-xs"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <Activity className="w-4 h-4" />
+                      <span>{t.appHeader.tutorialButton}</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-800 font-mono">12-Lead</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    onToggleInspector();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between p-2.5 rounded-lg border font-semibold transition ${
+                    isInspectorOpen
+                      ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <SlidersHorizontal className="w-4 h-4" />
+                    <span>{t.appHeader.inspectorButton}</span>
+                  </div>
+                  <span className="text-[10px] font-mono">{isInspectorOpen ? 'ACTIVE' : 'OFF'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    onExportPdf();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold transition shadow-xs"
+                >
+                  <div className="flex items-center space-x-2">
+                    <FileDown className="w-4 h-4" />
+                    <span>{t.appHeader.printPdf}</span>
+                  </div>
+                  <span className="text-[10px] font-mono">PDF</span>
+                </button>
+
+                <button
+                  onClick={handleAudioToggle}
+                  className={`w-full flex items-center justify-between p-2.5 rounded-lg border font-semibold transition ${
+                    audioMuted
+                      ? 'bg-slate-100 text-slate-500 border-slate-200'
+                      : 'bg-sky-50 text-sky-800 border-sky-200'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    {audioMuted ? <VolumeX className="w-4 h-4 text-slate-400" /> : <Volume2 className="w-4 h-4 text-sky-600" />}
+                    <span>{audioMuted ? t.appHeader.unmuteAudio : t.appHeader.muteAudio}</span>
+                  </div>
+                  <span className="text-[10px] font-mono">{audioMuted ? 'MUTED' : 'ON'}</span>
+                </button>
+              </div>
+
+              {/* Language Switch */}
+              <div className="pt-2 border-t border-slate-200">
+                <button
+                  onClick={toggleLocale}
+                  className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold transition cursor-pointer"
+                >
+                  <div className="flex items-center space-x-2">
+                    <Globe className="w-4 h-4 text-slate-500" />
+                    <span>{locale === 'id' ? 'Bahasa Indonesia' : 'English (US)'}</span>
+                  </div>
+                  <span className="font-mono text-xs text-sky-600 uppercase">[{locale.toUpperCase()}]</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Safe Area Footer */}
+            <div className="p-3 bg-slate-50 border-t border-slate-200 text-center text-[10px] text-slate-400 pb-[calc(env(safe-area-inset-bottom,0px)+12px)]">
+              CardioSim 3D • Clinical Biophysics Engine
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

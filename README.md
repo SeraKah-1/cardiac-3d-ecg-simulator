@@ -251,14 +251,47 @@ npm run dev
 Open your browser at `http://localhost:5173`.
 
 ### Production Build & Preview
-```bash
+```
 npm run build
 npm run preview
 ```
 
 ---
 
-## 9. Project Structure
+## 9. Mobile & Responsive Clinical UI/UX Architecture
+
+CardioSim 3D is designed for clinical workstations, tablets, and mobile devices (iOS Safari and Android Chrome):
+
+```
++---------------------------------------------------------------------------------------+
+| STATE-OF-THE-ART MOBILE & RESPONSIVE CLINICAL ARCHITECTURE                            |
++---------------------------------------------------------------------------------------+
+| 1. Dynamic Viewport (100dvh)      | Prevents mobile browser address bar clipping      |
+| 2. Notch & Safe-Area Padding      | Integrates env(safe-area-inset-*) top & bottom    |
+| 3. Zero-Trapping Tab Switcher     | [EKG Canvas] / [Reasoning] toggle (< 768px)       |
+| 4. Unified Pointer Dragging       | touch-action: none + pointer capture for calipers |
+| 5. Anti-Auto-Zoom Typography      | 16px mobile input font preventing iOS zoom        |
+| 6. Mobile Navigation Drawer       | Slide-over drawer for modes, inspector, and audio |
+| 7. Responsive Electrode Tray      | Auto-collapses on mobile to preserve 3D canvas    |
+| 8. CanvasPattern Memoization      | Eliminates 120 allocations/sec in animation loop  |
+| 9. Web Share API Fallback         | Native system share sheet for PDF exports         |
++---------------------------------------------------------------------------------------+
+```
+
+### 9.1 Segmented Mobile Viewport (Zero-Trapping Guarantee)
+In narrow portrait viewports (< 768px), stacking the 12-lead canvas and clinical reasoning panel vertically causes bottom navigation buttons to clip offscreen. CardioSim 3D implements a responsive Segmented Tab Switcher (`[ EKG Canvas ]` | `[ Reasoning ]`):
+- **EKG Canvas Mode**: Provides an unobstructed, full-height 12-lead paper canvas with pinch-zoom, pan, digital calipers, and quick step advancement buttons.
+- **Reasoning Mode**: Provides full-height, comfortable reading of the clinical reasoning panel, Thaler rules, and unclipped access to "Previous", "Next", and "Complete Case" actions.
+- On desktop and tablet viewports (>= 768px), both stages seamlessly render side-by-side.
+
+### 9.2 Mobile Biophysical Performance
+- **DPR Capping**: Canvas device pixel ratio is bounded at `min(window.devicePixelRatio, 2.0)` to eliminate GPU fill-rate throttling and thermal strain on high-density mobile screens.
+- **Memoized Grid Pattern**: Millimetric paper background generation is memoized via a `Map<number, CanvasPattern>`, eliminating repetitive offscreen canvas allocations during 60 FPS rendering.
+- **Audio Gesture Unlock**: Transparent window pointer listener unlocks Web Audio (`AudioContext`) on the first mobile touch.
+
+---
+
+## 10. Project Structure
 
 ```
 cardiac-3d-ecg-simulator/
@@ -342,6 +375,6 @@ cardiac-3d-ecg-simulator/
 
 ---
 
-## 10. License
+## 11. License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

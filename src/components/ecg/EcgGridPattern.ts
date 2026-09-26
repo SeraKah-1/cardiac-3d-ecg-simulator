@@ -3,7 +3,12 @@
  * Creates a reusable CanvasPattern for 1mm and 5mm grid lines,
  * rendering authentic hospital-grade ivory-pink ECG paper.
  */
+const patternCache = new Map<number, CanvasPattern>();
+
 export function createEcgGridPattern(pxPerMm: number): CanvasPattern | null {
+  const cached = patternCache.get(pxPerMm);
+  if (cached) return cached;
+
   const tileSizeMm = 25; // 5 large boxes = 25 small boxes
   const tileSizePx = Math.round(tileSizeMm * pxPerMm);
   const patternCanvas = document.createElement('canvas');
@@ -49,7 +54,9 @@ export function createEcgGridPattern(pxPerMm: number): CanvasPattern | null {
   }
   pCtx.stroke();
 
-  const dummyCanvas = document.createElement('canvas');
-  const dCtx = dummyCanvas.getContext('2d');
-  return dCtx ? dCtx.createPattern(patternCanvas, 'repeat') : null;
+  const pattern = pCtx.createPattern(patternCanvas, 'repeat');
+  if (pattern) {
+    patternCache.set(pxPerMm, pattern);
+  }
+  return pattern;
 }

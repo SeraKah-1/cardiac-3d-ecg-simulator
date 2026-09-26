@@ -63,6 +63,21 @@ export const App: React.FC = () => {
 
   const simTimeRef = useRef<number>(0);
 
+  // Mobile Safari/Chrome AudioContext unlock on first user touch gesture
+  useEffect(() => {
+    const handleFirstGesture = () => {
+      cardiacAudio.unlock();
+      window.removeEventListener('pointerdown', handleFirstGesture);
+      window.removeEventListener('touchstart', handleFirstGesture);
+    };
+    window.addEventListener('pointerdown', handleFirstGesture, { passive: true });
+    window.addEventListener('touchstart', handleFirstGesture, { passive: true });
+    return () => {
+      window.removeEventListener('pointerdown', handleFirstGesture);
+      window.removeEventListener('touchstart', handleFirstGesture);
+    };
+  }, []);
+
   // Synchronize electrode positions with active preset (e.g. V1/V2 malposition in 2nd ICS)
   useEffect(() => {
     const preset = CLINICAL_PRESETS.find((p) => p.id === activePresetId);
@@ -281,7 +296,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-slate-100 text-slate-900 font-sans overflow-hidden">
+    <div className="w-full h-[100dvh] min-h-[100dvh] flex flex-col bg-slate-100 text-slate-900 font-sans overflow-hidden">
       {/* 1. Streamlined App Top Header (52px) */}
       <AppHeader
         onExportPdf={handleExportPdf}
@@ -290,7 +305,7 @@ export const App: React.FC = () => {
         onOpenThalerAcademy={() => setActiveAppView('thaler_academy')}
       />
 
-      {/* 2. Dedicated Workspace Main Viewport Area (44px vertical height restored!) */}
+      {/* 2. Dedicated Workspace Main Viewport Area */}
       <main className="flex-1 flex w-full overflow-hidden relative">
         {/* Mode A: 'Eksplorasi Anatomi' (Full-height 3D Viewport, Collapsible Electrode Tray, and Rhythm Strip Preview) */}
         {workspaceMode === 'exploration' && (
@@ -315,11 +330,11 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* Mode C: 'Stasiun Terpadu' (Split 50/50: 3D Viewport with auto-collapsed tray & 12L Canvas in 2x6 grid) */}
+        {/* Mode C: 'Stasiun Terpadu' (Split: 3D Viewport & 12L Canvas - stacks vertically on mobile, side-by-side on desktop) */}
         {workspaceMode === 'integrated' && (
-          <div className="flex-1 flex w-full h-full overflow-hidden">
-            {/* Left 50%: 3D Viewport with auto-collapsed electrode tray */}
-            <div className="w-1/2 h-full border-r border-slate-200">
+          <div className="flex-1 flex flex-col md:flex-row w-full h-full overflow-hidden">
+            {/* Top on mobile, Left 50% on desktop: 3D Viewport */}
+            <div className="w-full md:w-1/2 h-1/2 md:h-full border-b md:border-b-0 md:border-r border-slate-200">
               <Cardiac3DViewport
                 leadModel={leadModel}
                 currentPhase={currentPhase}
@@ -328,8 +343,8 @@ export const App: React.FC = () => {
               />
             </div>
 
-            {/* Right 50%: 12-Lead ECG Canvas (2 Columns x 6 Rows) */}
-            <div className="w-1/2 h-full">
+            {/* Bottom on mobile, Right 50% on desktop: 12-Lead ECG Canvas */}
+            <div className="w-full md:w-1/2 h-1/2 md:h-full">
               <EcgMultiLeadCanvas buffers={buffers} />
             </div>
           </div>

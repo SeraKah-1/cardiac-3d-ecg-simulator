@@ -190,6 +190,20 @@ export class EcgPdfExporter {
     }
 
     // Save PDF
-    doc.save(`ECG_12LEAD_${patient.id}_${Date.now()}.pdf`);
+    const filename = `ECG_12LEAD_${patient.id}_${Date.now()}.pdf`;
+    try {
+      const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '');
+      if (isMobile && typeof navigator.share === 'function' && typeof File !== 'undefined') {
+        const blob = doc.output('blob');
+        const file = new File([blob], filename, { type: 'application/pdf' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: filename }).catch(() => doc.save(filename));
+          return;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+    doc.save(filename);
   }
 }

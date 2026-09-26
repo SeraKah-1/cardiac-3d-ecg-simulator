@@ -88,7 +88,7 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
 
   // Expanded View: Side-docked panel with max-height guard to prevent overlap with bottom controls
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-r-xl rounded-l-none border border-slate-200 border-l-0 shadow-xl p-3 text-slate-900 text-xs select-none w-72 sm:w-80 max-h-[calc(100%-65px)] overflow-y-auto pointer-events-auto transition-all duration-200">
+    <div className="bg-white/95 backdrop-blur-md rounded-r-xl rounded-l-none border border-slate-200 border-l-0 shadow-xl p-3 text-slate-900 text-xs select-none w-[calc(100vw-32px)] max-w-xs sm:w-80 max-h-[calc(100%-65px)] overflow-y-auto pointer-events-auto transition-all duration-200">
       {/* Tray Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
         <div className="flex items-center space-x-1.5 min-w-0">

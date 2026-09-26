@@ -397,7 +397,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
         <select
           value={currentCase.id}
           onChange={(e) => handleCaseChange(e.target.value)}
-          className="flex-1 bg-white border border-stone-300 text-stone-800 text-xs px-2 py-1 rounded font-sans truncate focus:outline-none focus:border-purple-500 shadow-2xs cursor-pointer"
+          className="flex-1 bg-white border border-stone-300 text-stone-800 text-base sm:text-xs px-2 py-1 rounded font-sans truncate focus:outline-none focus:border-purple-500 shadow-2xs cursor-pointer"
         >
           {cases.map((c, i) => (
             <option key={c.id} value={c.id}>
@@ -465,7 +465,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                     placeholder={locale === 'en' ? 'e.g. 75' : 'Contoh: 75'}
                     value={form.heartRateBpm}
                     onChange={(e) => setForm({ ...form, heartRateBpm: e.target.value })}
-                    className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-xs font-mono font-bold text-stone-900 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-base sm:text-xs font-mono font-bold text-stone-900 focus:outline-none focus:border-blue-500"
                     required
                   />
                 </div>
@@ -530,7 +530,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                     placeholder={t.practiceDrill.rhythmPlaceholder}
                     value={form.rhythmOrigin}
                     onChange={(e) => setForm({ ...form, rhythmOrigin: e.target.value })}
-                    className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-xs text-stone-900 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-amber-500"
                   />
                   {/* Quick rhythm chips */}
                   <div className="flex flex-wrap gap-1 mt-1">
@@ -590,7 +590,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   <select
                     value={form.prStatus}
                     onChange={(e) => setForm({ ...form, prStatus: e.target.value as any })}
-                    className="w-full bg-white border border-stone-300 rounded px-1.5 py-1 text-[11px] text-stone-800 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-stone-300 rounded px-1.5 py-1 text-base sm:text-[11px] text-stone-800 focus:outline-none focus:border-emerald-500"
                   >
                     <option value="">{t.practiceDrill.prPlaceholder}</option>
                     <option value="NORMAL">{t.practiceDrill.prNormal}</option>
@@ -628,7 +628,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   placeholder={t.practiceDrill.conductionDefectPlaceholder}
                   value={form.conductionDefect}
                   onChange={(e) => setForm({ ...form, conductionDefect: e.target.value })}
-                  className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-xs text-stone-900 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-emerald-500"
                 />
               </div>
             </div>
@@ -671,7 +671,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   placeholder={t.practiceDrill.affectedLeadsPlaceholder}
                   value={form.affectedLeads}
                   onChange={(e) => setForm({ ...form, affectedLeads: e.target.value })}
-                  className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-xs text-stone-900 focus:outline-none focus:border-rose-500"
+                  className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-rose-500"
                 />
               </div>
             </div>
@@ -722,7 +722,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   placeholder={t.practiceDrill.clinicalDiagnosisPlaceholder}
                   value={form.clinicalDiagnosis}
                   onChange={(e) => setForm({ ...form, clinicalDiagnosis: e.target.value })}
-                  className="w-full bg-white border border-stone-300 rounded p-2 text-xs text-stone-900 focus:outline-none focus:border-indigo-500 font-sans"
+                  className="w-full bg-white border border-stone-300 rounded p-2 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-indigo-500 font-sans"
                   required
                 />
               </div>

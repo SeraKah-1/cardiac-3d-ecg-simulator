@@ -125,15 +125,15 @@ export const DiagnosticFlowchartModal: React.FC<DiagnosticFlowchartModalProps> =
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-3 sm:p-6 overflow-hidden animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-2 sm:p-6 overflow-hidden animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-6xl max-h-[92vh] bg-white rounded-xl shadow-2xl border border-stone-200 flex flex-col overflow-hidden text-stone-800"
+        className="relative w-full max-w-6xl max-h-[92dvh] bg-white rounded-xl shadow-2xl border border-stone-200 flex flex-col overflow-hidden text-stone-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 1. Modal Header Bar */}
-        <div className="h-14 bg-white border-b border-stone-200 px-4 sm:px-6 flex items-center justify-between shrink-0">
+        <div className="h-14 bg-white border-b border-stone-200 px-3 sm:px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
               <GitFork className="w-4 h-4" />
@@ -155,14 +155,14 @@ export const DiagnosticFlowchartModal: React.FC<DiagnosticFlowchartModalProps> =
 
           {/* Search Box & Close Button */}
           <div className="flex items-center space-x-2">
-            <div className="relative w-44 sm:w-64">
+            <div className="relative w-36 sm:w-64">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400" />
               <input
                 type="text"
                 placeholder={fc.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1 bg-stone-50 hover:bg-stone-100 focus:bg-white text-xs border border-stone-200 rounded-md focus:outline-none focus:border-blue-500 font-sans transition"
+                className="w-full pl-8 pr-3 py-1 bg-stone-50 hover:bg-stone-100 focus:bg-white text-base sm:text-xs border border-stone-200 rounded-md focus:outline-none focus:border-blue-500 font-sans transition"
               />
             </div>
             <button

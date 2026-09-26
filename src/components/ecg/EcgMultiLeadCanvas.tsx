@@ -476,7 +476,8 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
       const wrapper = canvasWrapperRef.current;
       if (!canvas || !wrapper) return;
 
-      const dpr = window.devicePixelRatio || 1;
+      // Cap DPR to 2.0 to protect against mobile thermal throttling and extreme canvas memory allocations
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
       const rect = wrapper.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
 
@@ -502,8 +503,8 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
     };
   }, []);
 
-  // Handle click on canvas to select lead or drag calipers
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Handle pointer down on canvas to drag calipers (supports touch, mouse, stylus)
+  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!calipersActive) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -515,14 +516,20 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
     const c1X = padding + caliperX1 * availableW;
     const c2X = padding + caliperX2 * availableW;
 
-    if (Math.abs(x - c1X) < 15) {
+    // Generous touch hitbox (26px) for mobile fingers vs 15px mouse
+    const isTouch = e.pointerType === 'touch';
+    const hitThreshold = isTouch ? 26 : 15;
+
+    if (Math.abs(x - c1X) < hitThreshold) {
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
       setDraggingCaliper('c1');
-    } else if (Math.abs(x - c2X) < 15) {
+    } else if (Math.abs(x - c2X) < hitThreshold) {
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
       setDraggingCaliper('c2');
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!calipersActive || !draggingCaliper) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -539,7 +546,8 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
     }
   };
 
-  const handleMouseUp = () => {
+  const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
     setDraggingCaliper(null);
   };
 
@@ -687,10 +695,12 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
         <canvas
           ref={canvasRef}
           onClick={handleCanvasClick}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
           className="block cursor-pointer absolute inset-0"
+          style={{ touchAction: 'none' }}
           title={calipersActive ? t.canvas.canvasDragTooltip : t.canvas.canvasClickTooltip}
         />
       </div>

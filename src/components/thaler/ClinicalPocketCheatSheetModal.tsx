@@ -27,8 +27,8 @@ export const ClinicalPocketCheatSheetModal: React.FC<Props> = ({ isOpen, onClose
   const content = t.cheatSheetContent;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-4 sm:p-6 animate-in fade-in duration-150">
-      <div className="bg-white rounded-xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-2 sm:p-6 animate-in fade-in duration-150">
+      <div className="bg-white rounded-xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="px-5 py-3.5 bg-stone-900 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2.5">
@@ -105,7 +105,7 @@ export const ClinicalPocketCheatSheetModal: React.FC<Props> = ({ isOpen, onClose
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.cheatSheet.searchPlaceholder}
-              className="w-full bg-white border border-stone-300 rounded-md pl-8 pr-2.5 py-1 text-xs text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-blue-500 font-sans"
+              className="w-full bg-white border border-stone-300 rounded-md pl-8 pr-2.5 py-1 text-base sm:text-xs text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-blue-500 font-sans"
             />
           </div>
         </div>

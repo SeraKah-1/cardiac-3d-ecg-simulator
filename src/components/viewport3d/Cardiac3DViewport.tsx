@@ -35,7 +35,9 @@ export const Cardiac3DViewport: React.FC<Cardiac3DViewportProps> = ({
 
   const workspaceMode = useSimulationStore((s) => s.workspaceMode);
   const [prevWorkspaceMode, setPrevWorkspaceMode] = useState(workspaceMode);
-  const [isTrayCollapsed, setIsTrayCollapsed] = useState(workspaceMode === 'integrated');
+  const [isTrayCollapsed, setIsTrayCollapsed] = useState(
+    () => (typeof window !== 'undefined' && window.innerWidth < 768) || workspaceMode === 'integrated'
+  );
 
   // Auto-collapse electrode tray when switching to integrated mode
   if (prevWorkspaceMode !== workspaceMode) {
