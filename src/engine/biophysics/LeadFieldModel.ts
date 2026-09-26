@@ -8,67 +8,87 @@ import { CardiacDipoleEngine } from './CardiacDipoleEngine';
  */
 export const STANDARD_ELECTRODE_LANDMARKS: Record<
   PhysicalElectrodeId,
-  { pos: Vector3D; name: string; fullTitle: string; landmarkDesc: string }
+  { pos: Vector3D; name: string; fullTitle: string; fullTitleEn?: string; landmarkDesc: string; landmarkDescEn?: string }
 > = {
   RA: {
     pos: { x: -0.25, y: -0.22, z:  0.00 },
     name: 'RA',
     fullTitle: 'Right Arm (Lengan Kanan)',
+    fullTitleEn: 'Right Arm',
     landmarkDesc: 'Fossa Infraklavikula Dextra (bawah klavikula kanan)',
+    landmarkDescEn: 'Right Infraclavicular Fossa (below right clavicle)',
   },
   LA: {
     pos: { x:  0.25, y: -0.22, z:  0.00 },
     name: 'LA',
     fullTitle: 'Left Arm (Lengan Kiri)',
+    fullTitleEn: 'Left Arm',
     landmarkDesc: 'Fossa Infraklavikula Sinistra (bawah klavikula kiri)',
+    landmarkDescEn: 'Left Infraclavicular Fossa (below left clavicle)',
   },
   RL: {
     pos: { x: -0.12, y:  0.45, z:  0.00 },
     name: 'RL',
     fullTitle: 'Right Leg (Patient Ground / DRL)',
+    fullTitleEn: 'Right Leg (Patient Ground / DRL)',
     landmarkDesc: 'Abdomen Kanan Bawah / Tungkai Kanan (Grounding 50 Hz)',
+    landmarkDescEn: 'Right Lower Abdomen / Right Leg (50/60 Hz Grounding)',
   },
   LL: {
     pos: { x:  0.12, y:  0.45, z:  0.00 },
     name: 'LL',
     fullTitle: 'Left Leg (Tungkai Kiri)',
+    fullTitleEn: 'Left Leg',
     landmarkDesc: 'Abdomen Kiri Bawah / Tungkai Kiri (Sadapan Inferior)',
+    landmarkDescEn: 'Left Lower Abdomen / Left Leg (Inferior Leads)',
   },
   V1: {
     pos: { x: -0.03, y:  0.00, z: -0.11 },
     name: 'V1',
     fullTitle: 'Prekordial V1',
+    fullTitleEn: 'Precordial V1',
     landmarkDesc: 'Ruang Interkostal IV, Garis Parasternal Kanan',
+    landmarkDescEn: '4th Intercostal Space, Right Sternal Border',
   },
   V2: {
     pos: { x:  0.03, y:  0.00, z: -0.11 },
     name: 'V2',
     fullTitle: 'Prekordial V2',
+    fullTitleEn: 'Precordial V2',
     landmarkDesc: 'Ruang Interkostal IV, Garis Parasternal Kiri',
+    landmarkDescEn: '4th Intercostal Space, Left Sternal Border',
   },
   V3: {
     pos: { x:  0.06, y:  0.03, z: -0.10 },
     name: 'V3',
     fullTitle: 'Prekordial V3',
+    fullTitleEn: 'Precordial V3',
     landmarkDesc: 'Pertengahan anatomis antara elektroda V2 dan V4',
+    landmarkDescEn: 'Midway anatomically between leads V2 and V4',
   },
   V4: {
     pos: { x:  0.10, y:  0.06, z: -0.08 },
     name: 'V4',
     fullTitle: 'Prekordial V4',
+    fullTitleEn: 'Precordial V4',
     landmarkDesc: 'Ruang Interkostal V, Garis Midklavikularis Kiri',
+    landmarkDescEn: '5th Intercostal Space, Left Midclavicular Line',
   },
   V5: {
     pos: { x:  0.14, y:  0.06, z: -0.04 },
     name: 'V5',
     fullTitle: 'Prekordial V5',
+    fullTitleEn: 'Precordial V5',
     landmarkDesc: 'Ruang Interkostal V, Garis Aksilaris Anterior Kiri',
+    landmarkDescEn: '5th Intercostal Space, Left Anterior Axillary Line',
   },
   V6: {
     pos: { x:  0.16, y:  0.06, z:  0.01 },
     name: 'V6',
     fullTitle: 'Prekordial V6',
+    fullTitleEn: 'Precordial V6',
     landmarkDesc: 'Ruang Interkostal V, Garis Midaksilaris Kiri',
+    landmarkDescEn: '5th Intercostal Space, Left Midaxillary Line',
   },
 };
 

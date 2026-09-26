@@ -1,79 +1,72 @@
 import React from 'react';
 import { useSimulationStore } from '../../store/useSimulationStore';
+import { useLocale } from '../../locales/useLocale';
 import { Activity } from 'lucide-react';
 
-interface PhaseStep {
-  key: string;
-  acronym: string;
-  shortLabel: string;
-  fullLabel: string;
-  organ: string;
-  badgeClass: string;
-}
-
-const PHASES: PhaseStep[] = [
-  {
-    key: 'P',
-    acronym: 'P',
-    shortLabel: 'P (Atrium)',
-    fullLabel: 'Gelombang P',
-    organ: 'Depolarisasi Atrium',
-    badgeClass: 'bg-sky-600 text-white border-sky-700 shadow-xs ring-1 ring-sky-300',
-  },
-  {
-    key: 'PR',
-    acronym: 'PR',
-    shortLabel: 'PR (AV Nodus)',
-    fullLabel: 'Segmen PR',
-    organ: 'Konduksi Nodus AV',
-    badgeClass: 'bg-emerald-600 text-white border-emerald-700 shadow-xs ring-1 ring-emerald-300',
-  },
-  {
-    key: 'QRS',
-    acronym: 'QRS',
-    shortLabel: 'QRS (Ventrikel)',
-    fullLabel: 'Kompleks QRS',
-    organ: 'Depolarisasi Ventrikel',
-    badgeClass: 'bg-rose-600 text-white border-rose-700 shadow-xs ring-1 ring-rose-300 animate-pulse',
-  },
-  {
-    key: 'ST',
-    acronym: 'ST',
-    shortLabel: 'ST (Plateau)',
-    fullLabel: 'Segmen ST',
-    organ: 'Plateau Miokard',
-    badgeClass: 'bg-amber-600 text-white border-amber-700 shadow-xs ring-1 ring-amber-300',
-  },
-  {
-    key: 'T',
-    acronym: 'T',
-    shortLabel: 'T (Repol)',
-    fullLabel: 'Gelombang T',
-    organ: 'Repolarisasi Ventrikel',
-    badgeClass: 'bg-purple-600 text-white border-purple-700 shadow-xs ring-1 ring-purple-300',
-  },
-  {
-    key: 'Diastole',
-    acronym: 'Dia',
-    shortLabel: 'Diastol',
-    fullLabel: 'Fase Diastol',
-    organ: 'Pengisian Ventrikel',
-    badgeClass: 'bg-slate-700 text-white border-slate-800 shadow-xs ring-1 ring-slate-300',
-  },
-];
-
 export const CardiacPhaseBar: React.FC = () => {
+  const { t } = useLocale();
   const currentPhaseInfo = useSimulationStore((s) => s.conductionPhase);
+
+  const phases = [
+    {
+      key: 'P',
+      acronym: 'P',
+      shortLabel: `P (${t.cardiacPhase.atrialShortLabel || 'Atria'})`,
+      fullLabel: t.cardiacPhase.pWave,
+      organ: t.cardiacPhase.atrialDepol,
+      badgeClass: 'bg-sky-600 text-white border-sky-700 shadow-xs ring-1 ring-sky-300',
+    },
+    {
+      key: 'PR',
+      acronym: 'PR',
+      shortLabel: 'PR',
+      fullLabel: t.cardiacPhase.prSegment,
+      organ: t.cardiacPhase.avDelay,
+      badgeClass: 'bg-emerald-600 text-white border-emerald-700 shadow-xs ring-1 ring-emerald-300',
+    },
+    {
+      key: 'QRS',
+      acronym: 'QRS',
+      shortLabel: `QRS (${t.cardiacPhase.ventricularShortLabel || 'Ventricles'})`,
+      fullLabel: t.cardiacPhase.qrsComplex,
+      organ: t.cardiacPhase.ventricularDepol,
+      badgeClass: 'bg-rose-600 text-white border-rose-700 shadow-xs ring-1 ring-rose-300 animate-pulse',
+    },
+    {
+      key: 'ST',
+      acronym: 'ST',
+      shortLabel: 'ST',
+      fullLabel: t.cardiacPhase.stSegment,
+      organ: t.cardiacPhase.plateau,
+      badgeClass: 'bg-amber-600 text-white border-amber-700 shadow-xs ring-1 ring-amber-300',
+    },
+    {
+      key: 'T',
+      acronym: 'T',
+      shortLabel: 'T',
+      fullLabel: t.cardiacPhase.tWave,
+      organ: t.cardiacPhase.ventricularRepol,
+      badgeClass: 'bg-purple-600 text-white border-purple-700 shadow-xs ring-1 ring-purple-300',
+    },
+    {
+      key: 'Diastole',
+      acronym: 'Dia',
+      shortLabel: t.cardiacPhase.diastoleShortLabel || 'Diastole',
+      fullLabel: t.cardiacPhase.diastole,
+      organ: t.cardiacPhase.ventricularFilling,
+      badgeClass: 'bg-slate-700 text-white border-slate-800 shadow-xs ring-1 ring-slate-300',
+    },
+  ];
 
   return (
     <div className="flex items-center space-x-1 sm:space-x-1.5 text-xs select-none min-w-0">
       <div className="flex items-center space-x-1 text-slate-500 font-semibold text-[10px] uppercase tracking-wider shrink-0 mr-0.5">
         <Activity className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-        <span className="hidden sm:inline">Fase:</span>
+        <span className="hidden sm:inline">{t.cardiacPhase.phasePrefix}</span>
       </div>
 
       <div className="flex items-center space-x-0.5 sm:space-x-1 min-w-0">
-        {PHASES.map((p, idx) => {
+        {phases.map((p, idx) => {
           const isActive = currentPhaseInfo.key === p.key;
 
           return (
@@ -90,7 +83,7 @@ export const CardiacPhaseBar: React.FC = () => {
                 <span className="xl:hidden font-mono">{p.acronym}</span>
               </div>
 
-              {idx < PHASES.length - 1 && (
+              {idx < phases.length - 1 && (
                 <span className="text-slate-300 text-[10px] font-bold select-none shrink-0">→</span>
               )}
             </React.Fragment>

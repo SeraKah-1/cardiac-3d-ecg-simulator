@@ -71,7 +71,6 @@ export interface SimulationStoreState {
   setIsPlaying: (playing: boolean) => void;
   togglePlay: () => void;
   setSimulationSpeed: (speed: number) => void;
-  stepForward: () => void;
   setPaperSpeed: (speed: 25 | 50) => void;
   setVoltageGain: (gain: 5 | 10 | 20) => void;
   setLayoutFormat: (format: 'standard' | 'cabrera') => void;
@@ -168,7 +167,6 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
 
   isPlaying: true,
   simulationSpeed: 1.0,
-  stepForward: () => {},
   paperSpeedMmPerSec: 25,
   voltageGainMmPerMv: 10,
   layoutFormat: 'standard',
@@ -200,13 +198,13 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
     electrolyteAlerts: [],
     urgencyLevel: 'Normal',
     triageCategory: 'green',
-    primaryHeadline: 'Irama Sinus Normal - Tanpa Perubahan Iskemik Akut',
+    primaryHeadline: 'Normal Sinus Rhythm - No Acute Ischemia',
     bedsideActions: [
-      'Edukasi gaya hidup sehat dan pencegahan kardiovaskular',
-      'Tidak diperlukan intervensi kegawatdaruratan saat ini',
-      'Arsipkan rekaman EKG sebagai data dasar baseline pasien',
+      'Healthy lifestyle education and cardiovascular prevention',
+      'No emergency intervention indicated at present',
+      'Archive baseline ECG recording in patient electronic record',
     ],
-    allStatements: ['Normal Sinus Rhythm', 'No Acute Ischemic ST Changes'],
+    allStatements: ['Normal Sinus Rhythm', 'No Acute Ischemia'],
   },
 
   setFactor: (key, value) =>

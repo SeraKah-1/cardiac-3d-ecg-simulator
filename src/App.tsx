@@ -15,12 +15,15 @@ import { EcgRhythmStripPreview } from './components/ecg/EcgRhythmStripPreview';
 import { ClinicalSlideOverDrawer } from './components/inspector/ClinicalSlideOverDrawer';
 import { CardiacPhaseBar } from './components/hud/CardiacPhaseBar';
 import { TimeSpeedHUD } from './components/hud/TimeSpeedHUD';
+import { ThalerAcademyView } from './components/thaler/ThalerAcademyView';
+import { useLocale } from './locales/useLocale';
 
 const LEAD_LIST: LeadId[] = ['I', 'II', 'III', 'aVR', 'aVL', 'aVF', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6'];
 const DT_SUBSTEP = 0.002; // Fixed timestep 500 Hz = exactly 2 ms per sample
 const MAX_SUBSTEPS_PER_FRAME = 25; // Prevents spiral of death on background tab wakeups
 
 export const App: React.FC = () => {
+  const { locale } = useLocale();
   // Core Biophysical Engines
   const dipoleEngine = useMemo(() => new CardiacDipoleEngine(), []);
   const leadModel = useMemo(() => new LeadFieldModel(), []);
@@ -46,6 +49,9 @@ export const App: React.FC = () => {
   const setConductionPhase = useSimulationStore((s) => s.setConductionPhase);
   const isInspectorOpen = useSimulationStore((s) => s.isInspectorOpen);
   const setIsInspectorOpen = useSimulationStore((s) => s.setIsInspectorOpen);
+
+  // Top-level View Switcher: 'thaler_academy' or 'simulator'
+  const [activeAppView, setActiveAppView] = useState<'simulator' | 'thaler_academy'>('thaler_academy');
 
   // Local state for rendering synchronizer
   const [currentPhase, setCurrentPhase] = useState(0);
@@ -218,9 +224,9 @@ export const App: React.FC = () => {
       electrodeMisplacement: isHighV1V2,
     };
 
-    const report = DiagnosticRuleEngine.evaluate(features);
+    const report = DiagnosticRuleEngine.evaluate(features, locale);
     setDiagnostic(report);
-  }, [factors, placedElectrodes, activePresetId, leadModel, setDiagnostic]);
+  }, [factors, placedElectrodes, activePresetId, leadModel, setDiagnostic, locale]);
 
   // Critical Cardiac Alarm Coupling (IEC 60601-1-8 standard) for Lethal Arrhythmias
   useEffect(() => {
@@ -270,6 +276,10 @@ export const App: React.FC = () => {
     );
   }, [activePresetId, buffers, factors]);
 
+  if (activeAppView === 'thaler_academy') {
+    return <ThalerAcademyView onBackToSimulator={() => setActiveAppView('simulator')} />;
+  }
+
   return (
     <div className="w-screen h-screen flex flex-col bg-slate-100 text-slate-900 font-sans overflow-hidden">
       {/* 1. Streamlined App Top Header (52px) */}
@@ -277,6 +287,7 @@ export const App: React.FC = () => {
         onExportPdf={handleExportPdf}
         onToggleInspector={() => setIsInspectorOpen(!isInspectorOpen)}
         isInspectorOpen={isInspectorOpen}
+        onOpenThalerAcademy={() => setActiveAppView('thaler_academy')}
       />
 
       {/* 2. Dedicated Workspace Main Viewport Area (44px vertical height restored!) */}

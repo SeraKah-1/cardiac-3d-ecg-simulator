@@ -4,6 +4,7 @@ import { EcgRingBuffer } from './EcgRingBuffer';
 import { createEcgGridPattern } from './EcgGridPattern';
 import { useSimulationStore } from '../../store/useSimulationStore';
 import { Activity } from 'lucide-react';
+import { useLocale } from '../../locales/useLocale';
 
 interface EcgRhythmStripPreviewProps {
   buffers: Record<LeadId, EcgRingBuffer>;
@@ -14,6 +15,7 @@ export const EcgRhythmStripPreview: React.FC<EcgRhythmStripPreviewProps> = ({
   buffers,
   leads = ['I', 'II', 'V2'],
 }) => {
+  const { t } = useLocale();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -254,14 +256,14 @@ export const EcgRhythmStripPreview: React.FC<EcgRhythmStripPreviewProps> = ({
     >
       <div className="absolute top-1.5 right-3 z-10 flex items-center space-x-2 text-[10px] bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded border border-slate-200 text-slate-600 font-mono">
         <Activity className="w-3 h-3 text-rose-500 animate-pulse" />
-        <span>Preview Irama 3-Sadapan (Live 500 Hz)</span>
+        <span>{t.canvas.rhythmStripLiveTitle}</span>
       </div>
 
       <canvas
         ref={canvasRef}
         onClick={handleCanvasClick}
         className="block cursor-pointer w-full h-full"
-        title="Klik sadapan untuk memilih"
+        title={t.canvas.clickLeadToSelect}
       />
     </div>
   );

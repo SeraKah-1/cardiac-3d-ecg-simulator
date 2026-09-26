@@ -3,6 +3,7 @@ import { PhysicalElectrodeId } from '../../engine/biophysics/types';
 import { STANDARD_ELECTRODE_LANDMARKS } from '../../engine/biophysics/LeadFieldModel';
 import { useSimulationStore } from '../../store/useSimulationStore';
 import { Check, X, AlertCircle, ChevronLeft, ChevronRight, Disc3 } from 'lucide-react';
+import { useLocale } from '../../locales/useLocale';
 
 interface ElectrodeTrayProps {
   onElectrodeClick?: (id: PhysicalElectrodeId) => void;
@@ -46,6 +47,7 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
   onToggleCollapse,
 }) => {
   const placedElectrodes = useSimulationStore((s) => s.placedElectrodes);
+  const { t, locale } = useLocale();
   const setElectrodePlaced = useSimulationStore((s) => s.setElectrodePlaced);
   const attachAllElectrodes = useSimulationStore((s) => s.attachAllElectrodes);
   const detachAllElectrodes = useSimulationStore((s) => s.detachAllElectrodes);
@@ -75,10 +77,10 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
       <button
         onClick={onToggleCollapse}
         className="flex items-center space-x-1.5 bg-white/95 backdrop-blur-md px-2.5 py-2 rounded-r-xl border border-slate-200 border-l-0 shadow-md text-xs font-bold text-slate-800 hover:bg-slate-50 transition pointer-events-auto"
-        title="Buka Baki Elektroda"
+        title={t.viewport3d.openTray}
       >
         <Disc3 className="w-3.5 h-3.5 text-sky-600 animate-spin-slow" />
-        <span className="text-[11px] font-bold text-slate-800">Baki ({totalPlaced}/10)</span>
+        <span className="text-[11px] font-bold text-slate-800">{t.viewport3d.trayTitle} ({totalPlaced}/10)</span>
         <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
       </button>
     );
@@ -92,7 +94,7 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
         <div className="flex items-center space-x-1.5 min-w-0">
           <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" />
           <span className="font-bold text-slate-800 text-xs tracking-tight truncate">
-            Baki Elektroda
+            {t.viewport3d.trayTitle}
           </span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold shrink-0 ${
             isAllAttached ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
@@ -106,7 +108,7 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
           <button
             onClick={onToggleCollapse}
             className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0 ml-1"
-            title="Ciutkan Baki Elektroda"
+            title={t.viewport3d.collapseTray}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -123,10 +125,10 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
               ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
               : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
           }`}
-          title="Pasang semua 10 elektroda pada torso"
+          title={t.viewport3d.attachAllTooltip}
         >
           <Check className="w-3 h-3" />
-          <span>Pasang Semua</span>
+          <span>{t.viewport3d.attachAll}</span>
         </button>
         <button
           onClick={detachAllElectrodes}
@@ -136,10 +138,10 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
               ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
               : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
           }`}
-          title="Lepas seluruh elektroda ke dalam baki (simulasi Lead-Off)"
+          title={t.viewport3d.detachAllTooltip}
         >
           <X className="w-3 h-3" />
-          <span>Lepas Semua</span>
+          <span>{t.viewport3d.detachAll}</span>
         </button>
       </div>
 
@@ -147,15 +149,15 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
       {!isAllAttached && (
         <div className="flex items-center space-x-1.5 p-1.5 mb-2 bg-amber-50 border border-amber-200 rounded-md text-[10px] text-amber-800 leading-tight">
           <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-          <span>Klik elektroda di bawah atau target ring pada torso untuk memasang.</span>
+          <span>{t.viewport3d.trayNotice}</span>
         </div>
       )}
 
       {/* 1. Limb Leads Group */}
       <div className="mb-2">
         <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center justify-between">
-          <span>Sadapan Ekstremitas</span>
-          <span className="text-[9px] font-normal text-slate-400">Standar {colorStandard}</span>
+          <span>{t.viewport3d.limbLeads}</span>
+          <span className="text-[9px] font-normal text-slate-400">{t.viewport3d.standardPrefix} {colorStandard}</span>
         </div>
         <div className="grid grid-cols-2 gap-1.5">
           {LIMB_ELECTRODES.map((id) => {
@@ -175,7 +177,7 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
                     ? 'border-slate-200 bg-slate-50/80 hover:bg-slate-100'
                     : 'border-dashed border-rose-300 bg-rose-50/40 hover:bg-rose-50'
                 }`}
-                title={`${landmark.fullTitle}: ${landmark.landmarkDesc}`}
+                title={`${locale === 'en' ? landmark.fullTitleEn || landmark.fullTitle : landmark.fullTitle}: ${locale === 'en' ? landmark.landmarkDescEn || landmark.landmarkDesc : landmark.landmarkDesc}`}
               >
                 <div className="flex items-center space-x-1.5 min-w-0">
                   <span
@@ -188,7 +190,7 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
                       {id}
                     </div>
                     <div className="text-[9px] text-slate-400 truncate mt-0.5">
-                      {id === 'RL' ? 'Ground' : id === 'RA' ? 'Lengan Ka' : id === 'LA' ? 'Lengan Ki' : 'Tungkai Ki'}
+                      {id === 'RL' ? t.viewport3d.groundLead : id === 'RA' ? t.viewport3d.rightArmShort : id === 'LA' ? t.viewport3d.leftArmShort : t.viewport3d.leftLegShort}
                     </div>
                   </div>
                 </div>
@@ -213,7 +215,7 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
       {/* 2. Precordial Leads Group */}
       <div>
         <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-          Sadapan Prekordial Dada (V1 - V6)
+          {t.viewport3d.precordialLeads}
         </div>
         <div className="grid grid-cols-3 gap-1.5">
           {CHEST_ELECTRODES.map((id) => {
@@ -233,7 +235,7 @@ export const ElectrodeTray: React.FC<ElectrodeTrayProps> = ({
                     ? 'border-slate-200 bg-slate-50/80 hover:bg-slate-100'
                     : 'border-dashed border-rose-300 bg-rose-50/40 hover:bg-rose-50'
                 }`}
-                title={`${landmark.fullTitle}: ${landmark.landmarkDesc}`}
+                title={`${locale === 'en' ? landmark.fullTitleEn || landmark.fullTitle : landmark.fullTitle}: ${locale === 'en' ? landmark.landmarkDescEn || landmark.landmarkDesc : landmark.landmarkDesc}`}
               >
                 <div className="flex items-center space-x-1 mb-1">
                   <span

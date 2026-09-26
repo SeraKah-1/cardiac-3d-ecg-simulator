@@ -12,6 +12,7 @@ import { LeadFieldModel } from '../../engine/biophysics/LeadFieldModel';
 import { Vector3D } from '../../engine/biophysics/types';
 import { useSimulationStore } from '../../store/useSimulationStore';
 import { Eye, RotateCcw, Activity, Layers } from 'lucide-react';
+import { useLocale } from '../../locales/useLocale';
 
 interface Cardiac3DViewportProps {
   leadModel: LeadFieldModel;
@@ -28,6 +29,7 @@ export const Cardiac3DViewport: React.FC<Cardiac3DViewportProps> = ({
   onElectrodeMoved,
   showTray = true,
 }) => {
+  const { t } = useLocale();
   const [torsoMesh, setTorsoMesh] = useState<THREE.Mesh | null>(null);
   const controlsRef = useRef<any>(null);
 
@@ -72,9 +74,9 @@ export const Cardiac3DViewport: React.FC<Cardiac3DViewportProps> = ({
       <div className="absolute top-3 left-3 z-10 pointer-events-auto">
         <div className="flex items-center space-x-2 bg-white/95 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs shadow-xs">
           <Layers className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-          <span className="font-bold text-slate-800">3D Anatomi Torso</span>
+          <span className="font-bold text-slate-800">{t.viewport3d.torsoTitle}</span>
           <span className="text-slate-300 hidden sm:inline">|</span>
-          <span className="text-slate-500 hidden sm:inline text-[11px]">Geser elektroda untuk analisis</span>
+          <span className="text-slate-500 hidden sm:inline text-[11px]">{t.viewport3d.torsoSubtitle}</span>
         </div>
       </div>
 
@@ -84,7 +86,7 @@ export const Cardiac3DViewport: React.FC<Cardiac3DViewportProps> = ({
           <button
             onClick={() => setColorStandard(colorStandard === 'AHA' ? 'IEC' : 'AHA')}
             className="px-2 py-1 rounded hover:bg-slate-100 text-slate-700 font-semibold text-[11px] transition"
-            title="Ganti standar kode warna elektroda AHA (USA) atau IEC (Internasional)"
+            title={t.viewport3d.colorStandardTooltip}
           >
             {colorStandard}
           </button>
@@ -92,19 +94,19 @@ export const Cardiac3DViewport: React.FC<Cardiac3DViewportProps> = ({
           <button
             onClick={handleResetElectrodes}
             className="px-2 py-1 rounded hover:bg-slate-100 text-slate-700 flex items-center space-x-1 text-[11px] font-medium transition"
-            title="Reset posisi seluruh elektroda ke landmark anatomis standar"
+            title={t.viewport3d.resetLeadsTooltip}
           >
             <RotateCcw className="w-3 h-3 text-slate-500" />
-            <span className="hidden sm:inline">Reset Sadapan</span>
+            <span className="hidden sm:inline">{t.viewport3d.resetLeads}</span>
           </button>
           <div className="h-3.5 w-px bg-slate-200" />
           <button
             onClick={handleResetCamera}
             className="px-2 py-1 rounded hover:bg-slate-100 text-slate-700 flex items-center space-x-1 text-[11px] font-medium transition"
-            title="Kembalikan sudut kamera 3D ke posisi awal"
+            title={t.viewport3d.cameraTooltip}
           >
             <Eye className="w-3 h-3 text-slate-500" />
-            <span>Kamera</span>
+            <span>{t.viewport3d.camera}</span>
           </button>
         </div>
       </div>
@@ -169,7 +171,7 @@ export const Cardiac3DViewport: React.FC<Cardiac3DViewportProps> = ({
       <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-lg border border-slate-200 text-xs shadow-md pointer-events-auto">
         {/* Opacity Slider */}
         <div className="flex items-center space-x-2">
-          <span className="text-slate-600 font-medium text-[11px]">Transparansi Torso:</span>
+          <span className="text-slate-600 font-medium text-[11px]">{t.viewport3d.torsoOpacityLabel}</span>
           <input
             type="range"
             min="0.0"
@@ -191,8 +193,8 @@ export const Cardiac3DViewport: React.FC<Cardiac3DViewportProps> = ({
               onChange={(e) => setShowLeadWires(e.target.checked)}
               className="accent-sky-600 rounded cursor-pointer"
             />
-            <span className="hidden sm:inline">Kabel Sadapan</span>
-            <span className="sm:hidden">Kabel</span>
+            <span className="hidden sm:inline">{t.viewport3d.leadWires}</span>
+            <span className="sm:hidden">{t.viewport3d.leadWiresShort}</span>
           </label>
 
           <label className="flex items-center space-x-1.5 cursor-pointer text-slate-700 hover:text-slate-900 transition font-medium text-[11px]">
@@ -203,8 +205,8 @@ export const Cardiac3DViewport: React.FC<Cardiac3DViewportProps> = ({
               className="accent-amber-500 rounded cursor-pointer"
             />
             <Activity className="w-3.5 h-3.5 text-amber-600" />
-            <span className="hidden sm:inline">Vektor Dipol 3D</span>
-            <span className="sm:hidden">Dipol</span>
+            <span className="hidden sm:inline">{t.viewport3d.dipoleVector}</span>
+            <span className="sm:hidden">{t.viewport3d.dipoleVectorShort}</span>
           </label>
         </div>
       </div>

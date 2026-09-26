@@ -4,12 +4,14 @@ import { EcgRingBuffer } from './EcgRingBuffer';
 import { createEcgGridPattern } from './EcgGridPattern';
 import { useSimulationStore } from '../../store/useSimulationStore';
 import { Ruler, Activity } from 'lucide-react';
+import { useLocale } from '../../locales/useLocale';
 
 interface EcgMultiLeadCanvasProps {
   buffers: Record<LeadId, EcgRingBuffer>;
 }
 
 export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers }) => {
+  const { t } = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -580,7 +582,7 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
         <div className="flex items-center space-x-1.5 text-slate-700 min-w-0">
           <Activity className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
           <span className="font-bold tracking-tight text-[11px] truncate">
-            {isSplitMode ? '12L Terpadu (2 Kolom x 6 Baris)' : 'Monitor EKG 12-Sadapan'}
+            {isSplitMode ? t.canvas.integrated12L : t.canvas.monitor12L}
           </span>
           <span className="text-slate-400 text-[10px] font-mono hidden md:inline">
             ({paperSpeed} mm/s, {voltageGain} mm/mV)
@@ -596,7 +598,7 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
               className={`px-1.5 py-0.5 rounded transition ${
                 paperSpeed === 25 ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Kecepatan Kertas: 25 mm/s"
+              title={t.canvas.speedTooltip(25)}
             >
               25 mm/s
             </button>
@@ -605,7 +607,7 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
               className={`px-1.5 py-0.5 rounded transition ${
                 paperSpeed === 50 ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Kecepatan Kertas: 50 mm/s"
+              title={t.canvas.speedTooltip(50)}
             >
               50 mm/s
             </button>
@@ -618,7 +620,7 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
               className={`px-1.5 py-0.5 rounded transition ${
                 voltageGain === 5 ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Voltase: 5 mm/mV"
+              title={t.canvas.gainTooltip(5)}
             >
               5
             </button>
@@ -627,7 +629,7 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
               className={`px-1.5 py-0.5 rounded transition ${
                 voltageGain === 10 ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Voltase: 10 mm/mV (Standar)"
+              title={t.canvas.gainTooltip(10, true)}
             >
               10
             </button>
@@ -636,7 +638,7 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
               className={`px-1.5 py-0.5 rounded transition ${
                 voltageGain === 20 ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Voltase: 20 mm/mV"
+              title={t.canvas.gainTooltip(20)}
             >
               20
             </button>
@@ -649,18 +651,18 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
               className={`px-1.5 py-0.5 rounded transition ${
                 layoutFormat === 'standard' ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Susunan Standar 12 Sadapan"
+              title={t.canvas.standardArrangementTooltip}
             >
-              {isSplitMode ? '12L' : 'Standar'}
+              {isSplitMode ? t.canvas.standardSplitLabel : t.canvas.standardLabel}
             </button>
             <button
               onClick={() => setLayoutFormat('cabrera')}
               className={`px-1.5 py-0.5 rounded transition ${
                 layoutFormat === 'cabrera' ? 'bg-amber-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Susunan Cabrera (Hexaksial Anatomis: aVL, I, -aVR, II, aVF, III)"
+              title={t.canvas.cabreraArrangementTooltip}
             >
-              {isSplitMode ? 'Cab' : 'Cabrera'}
+              {isSplitMode ? t.canvas.cabreraSplitLabel : t.canvas.cabreraLabel}
             </button>
           </div>
 
@@ -672,10 +674,10 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
                 ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
                 : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
-            title="Nyalakan / Matikan Kaliper Digital"
+            title={t.canvas.digitalCaliperTooltip}
           >
             <Ruler className="w-3 h-3" />
-            <span>Kaliper</span>
+            <span>{t.canvas.caliperBtn}</span>
           </button>
         </div>
       </div>
@@ -689,7 +691,7 @@ export const EcgMultiLeadCanvas: React.FC<EcgMultiLeadCanvasProps> = ({ buffers 
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           className="block cursor-pointer absolute inset-0"
-          title={calipersActive ? 'Geser garis kaliper untuk mengukur interval' : 'Klik sadapan untuk inspeksi lebih detail'}
+          title={calipersActive ? t.canvas.canvasDragTooltip : t.canvas.canvasClickTooltip}
         />
       </div>
     </div>
