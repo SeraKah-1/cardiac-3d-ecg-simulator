@@ -53,7 +53,7 @@ export const ClinicalStepper: React.FC<ClinicalStepperProps> = ({
               key={idx}
               ref={isActive ? activeItemRef : null}
               onClick={() => onSelectStep(idx)}
-              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-xs transition cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-xs transition cursor-pointer whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                 isActive
                   ? 'bg-blue-600 text-white font-bold shadow-xs ring-1 ring-blue-700'
                   : isCompleted

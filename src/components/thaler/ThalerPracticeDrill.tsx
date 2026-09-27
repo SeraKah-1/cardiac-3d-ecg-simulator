@@ -564,7 +564,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
           <select
             value={currentCase.id}
             onChange={(e) => handleCaseChange(e.target.value)}
-            className="text-xs bg-white border border-stone-300 rounded px-2 py-1 font-mono font-bold text-stone-800 focus:outline-none focus:border-purple-500 truncate cursor-pointer"
+            className="text-base sm:text-xs bg-white border border-stone-300 rounded px-2 py-1 font-mono font-bold text-stone-800 focus:outline-none focus:border-purple-500 truncate cursor-pointer"
           >
             {cases.map((c, idx) => (
               <option key={c.id} value={c.id}>
@@ -1390,7 +1390,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <strong className="text-stone-900">{form.paperSpeed || '-'} mm/s | {form.voltageSensitivity || '-'} mm/mV</strong>{' '}
@@ -1424,7 +1424,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <strong className="text-stone-900">{form.heartRateBpm || '--'} bpm</strong>{' '}
@@ -1458,7 +1458,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <span className="text-stone-900 font-semibold">{form.regularity || '-'}</span> |{' '}
@@ -1488,7 +1488,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                       {evaluation.axisStatus === 'MATCH' ? t.practiceDrill.matchStatus : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <strong className="text-stone-900">{form.axisClassification || '-'}</strong>
@@ -1523,7 +1523,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <span>P: {form.pWaveMorphology || '-'}</span> | <span>Atrium: {form.atrialEnlargement || '-'}</span>
@@ -1557,7 +1557,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <span>PR: {form.prStatus || '-'}</span> | <span>QTc: {form.qtcStatus || '-'}</span>
@@ -1591,7 +1591,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <span>QRS: {form.qrsStatus || '-'}</span> | <span>BBB: {form.bundleBranchBlock || '-'}</span>
@@ -1626,7 +1626,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <span>R: {form.rWaveProgression || '-'}</span> | <span>Q Patologis: {form.hasPathologicQ || '-'}</span>
@@ -1663,7 +1663,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         : t.practiceDrill.severeStatus}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <span>ST: {form.stDeviation || '-'}</span> | <span>T: {form.tWaveMorphology || '-'}</span> | <span>U: {form.uWaveStatus || '-'}</span>
@@ -1722,7 +1722,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
             </div>
 
             {/* PDF Export Actions */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => {
@@ -1743,8 +1743,10 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                     pathologicalQ: form.hasPathologicQ,
                     stDeviation: form.stDeviation,
                     tWaveMorphology: form.tWaveMorphology,
+                    stMorphology: `${form.stDeviation || '-'} ST, ${form.tWaveMorphology || '-'} T`,
                     uWaveStatus: form.uWaveStatus,
                     vascularTerritory: form.vascularTerritory,
+                    ischemiaLeads: form.affectedLeads || form.vascularTerritory || '-',
                     clinicalDiagnosis: `[${form.triageCategory}] ${form.clinicalDiagnosis}`,
                   };
                   ThalerPdfExportEngine.exportPracticeDebriefReport(

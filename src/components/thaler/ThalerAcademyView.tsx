@@ -294,7 +294,7 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
         </div>
 
         {/* Center: Educational Tools + Clinical Bedside Aids + Mode Switcher */}
-        <div data-tour="educational-tools" className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto py-1">
+        <div data-tour="educational-tools" className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto py-1 min-w-0 flex-1 no-scrollbar">
           {/* Lead Territory Guide Button */}
           <button
             onClick={() => setIsLeadTerritoryOpen(true)}
@@ -303,7 +303,6 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
           >
             <Layers className="w-3.5 h-3.5 text-amber-600" />
             <span className="hidden lg:inline">{t.common.leadTerritoryBtn}</span>
-            <span className="lg:hidden">{t.common.leadTerritoryBtn}</span>
           </button>
 
           {/* Axis Quadrant Wheel Button */}
@@ -314,7 +313,6 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
           >
             <Compass className="w-3.5 h-3.5 text-purple-600" />
             <span className="hidden lg:inline">{t.common.axisBtn}</span>
-            <span className="lg:hidden">{t.common.axisBtn}</span>
           </button>
 
           {/* Flowchart Button */}
@@ -325,7 +323,6 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
           >
             <GitFork className="w-3.5 h-3.5 text-blue-600" />
             <span className="hidden lg:inline">{t.common.flowchartBtn}</span>
-            <span className="lg:hidden">{t.common.flowchartBtn}</span>
           </button>
 
           {/* Visual Atlas Button */}
@@ -336,7 +333,6 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
           >
             <BookOpen className="w-3.5 h-3.5 text-rose-600" />
             <span className="hidden lg:inline">{t.common.atlasBtn}</span>
-            <span className="lg:hidden">{t.common.atlasBtn}</span>
           </button>
 
           {/* Buku Saku EKG (Pocket Cheat Sheet) */}
@@ -347,7 +343,6 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
           >
             <Bookmark className="w-3.5 h-3.5 text-emerald-600" />
             <span className="hidden lg:inline">{t.common.pocketGuideBtn}</span>
-            <span className="lg:hidden">{t.common.pocketGuideBtn}</span>
           </button>
 
           {/* Bedside Clinical Calculators */}
@@ -358,7 +353,6 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
           >
             <Calculator className="w-3.5 h-3.5 text-sky-600" />
             <span className="hidden lg:inline">{t.common.calculatorsBtn}</span>
-            <span className="lg:hidden">{t.common.calculatorsBtn}</span>
           </button>
 
           {/* Lembar Kerja OSCE PDF Download Button */}
@@ -440,7 +434,7 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
             data-tour="case-selector"
             value={selectedCaseId}
             onChange={(e) => handleSelectCase(e.target.value)}
-            className="bg-white border border-stone-300 text-stone-800 text-xs px-2.5 py-1 rounded font-sans focus:outline-none focus:border-blue-500 max-w-[210px] truncate shadow-2xs cursor-pointer"
+            className="bg-white border border-stone-300 text-stone-800 text-base sm:text-xs px-2.5 py-1 rounded font-sans focus:outline-none focus:border-blue-500 max-w-[130px] sm:max-w-[210px] truncate shadow-2xs cursor-pointer"
           >
             {(['FOUNDATION', 'EMERGENCY_RED_FLAG', 'INTERMEDIATE_WARD', 'ADVANCED_EXPERT'] as ClinicalTier[]).map((tierKey) => {
               const tierCases = THALER_EKG_CASES.filter((c) => c.clinicalTier === tierKey);
@@ -561,9 +555,14 @@ const ThalerAcademyInner: React.FC<ThalerAcademyViewProps> = ({ onBackToSimulato
                 </span>
                 <button
                   onClick={stepIndex >= currentCase.tutorialSteps.length - 1 ? () => setIsCompletionModalOpen(true) : handleNextStep}
-                  className="px-2.5 py-1 text-xs font-bold rounded bg-blue-600 text-white cursor-pointer shadow-xs"
+                  className="px-2.5 py-1 text-xs font-bold rounded bg-blue-600 text-white cursor-pointer shadow-xs shrink-0"
                 >
-                  {stepIndex >= currentCase.tutorialSteps.length - 1 ? t.common.completeCase : `${t.common.next} \u2192`}
+                  {stepIndex >= currentCase.tutorialSteps.length - 1 ? (
+                    <>
+                      <span className="hidden sm:inline">{t.common.completeCase}</span>
+                      <span className="sm:hidden">{locale === 'en' ? 'Finish' : 'Selesai'}</span>
+                    </>
+                  ) : `${t.common.next} \u2192`}
                 </button>
                 <button
                   onClick={() => setMobileTab('reasoning')}

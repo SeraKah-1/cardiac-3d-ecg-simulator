@@ -42,12 +42,28 @@ export const CaseCompletionModal: React.FC<CaseCompletionModalProps> = ({
     }
   }, [isOpen, currentCase]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const isFoundation = currentCase.category === 'NORMAL' && currentCase.id.includes('foundations');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/65 backdrop-blur-xs font-sans">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="case-completion-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/65 backdrop-blur-xs font-sans"
+    >
       <div className="bg-white rounded-xl shadow-2xl border border-stone-200 w-full max-w-xl max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Modal Top Banner */}
         <div className="bg-linear-to-r from-emerald-600 to-teal-700 p-5 text-white relative">
@@ -67,7 +83,7 @@ export const CaseCompletionModal: React.FC<CaseCompletionModalProps> = ({
               <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-white/25 rounded">
                 {isFoundation ? t.completion.foundationDoneBadge : t.completion.caseDoneBadge}
               </span>
-              <h3 className="text-lg font-bold text-white leading-tight mt-1">
+              <h3 id="case-completion-title" className="text-lg font-bold text-white leading-tight mt-1">
                 {isFoundation ? t.completion.foundationDoneTitle : t.completion.caseDoneTitle(currentCase.caseCode)}
               </h3>
             </div>

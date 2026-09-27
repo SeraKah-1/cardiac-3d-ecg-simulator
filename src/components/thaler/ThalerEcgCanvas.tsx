@@ -97,6 +97,11 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     if (onCanvasRef && canvasRef.current) {
       onCanvasRef(canvasRef.current);
     }
+    return () => {
+      if (onCanvasRef) {
+        onCanvasRef(null);
+      }
+    };
   }, [onCanvasRef]);
 
   // Clear caliper measurement when deactivated or case changes
@@ -390,7 +395,7 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
         ctx.fillText(label, midX - textWidth / 2, midY);
       }
     }
-  }, [currentCase, camera, highlightBoxes, activeStep, isCaliperActive, caliperStart, caliperCurrent, caliperResult, isMarchingMode]);
+  }, [currentCase, camera, highlightBoxes, activeStep, isCaliperActive, caliperStart, caliperCurrent, caliperResult, isMarchingMode, locale]);
 
   useEffect(() => {
     renderEcg();
@@ -647,8 +652,8 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
   return (
     <div className="flex flex-col h-full bg-stone-100 border border-stone-300 select-none overflow-hidden rounded-md shadow-xs">
       {/* Canvas Top Telemetry & Control Bar */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-stone-50 border-b border-stone-200 text-xs text-stone-700">
-        <div className="flex items-center space-x-3">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-stone-50 border-b border-stone-200 text-xs text-stone-700 gap-2 overflow-x-auto no-scrollbar">
+        <div className="flex items-center space-x-3 shrink-0">
           <span className="font-sans font-bold text-stone-900 tracking-tight">
             {t.common.appTitle}
           </span>
@@ -660,11 +665,11 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 shrink-0">
           {/* Caliper active pill and Marching toggle */}
           {isCaliperActive && (
             <div className="flex items-center space-x-1.5">
-              <div className="px-2 py-0.5 bg-amber-50 border border-amber-300 text-amber-900 font-mono text-[11px] rounded">
+              <div className="px-2 py-0.5 bg-amber-50 border border-amber-300 text-amber-900 font-mono text-[11px] rounded whitespace-nowrap">
                 {caliperResult ? (
                   <span>
                     dX: <strong>{caliperResult.mmX.toFixed(1)} mm</strong> ({Math.round(caliperResult.sec * 1000)} ms) | dY: <strong>{caliperResult.mv.toFixed(2)} mV</strong>
@@ -750,12 +755,12 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
         </div>
 
         {/* Floating Interactive Zoom & Pan Toolbar Pill Overlay */}
-        <div className="absolute bottom-3 right-3 flex items-center bg-white/95 backdrop-blur-md rounded-full shadow-md border border-stone-200 px-1 py-0.5 space-x-1 z-20">
+        <div className="absolute bottom-3 right-3 flex items-center bg-white/95 backdrop-blur-md rounded-full shadow-md border border-stone-200 px-1.5 py-1 space-x-1.5 z-20">
           <button
             type="button"
             onClick={handleZoomOut}
             disabled={localZoom <= 1.05}
-            className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full text-stone-700 hover:bg-stone-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition"
+            className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-sm sm:text-xs font-bold rounded-full text-stone-700 hover:bg-stone-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition touch-manipulation"
             title={locale === 'en' ? 'Zoom Out (-)' : 'Perkecil (-)'}
           >
             -
@@ -763,7 +768,7 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
           <button
             type="button"
             onClick={handleResetCameraZoom}
-            className="px-2 h-7 flex items-center justify-center font-mono text-[11px] font-bold text-stone-800 hover:bg-stone-100 rounded cursor-pointer transition"
+            className="px-2.5 h-9 sm:h-8 flex items-center justify-center font-mono text-xs sm:text-[11px] font-bold text-stone-800 hover:bg-stone-100 rounded-full cursor-pointer transition touch-manipulation"
             title={locale === 'en' ? 'Reset to 1.0x (Fit)' : 'Kembalikan ke 1.0x (Pas)'}
           >
             {localZoom.toFixed(1)}x
@@ -772,7 +777,7 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
             type="button"
             onClick={handleZoomIn}
             disabled={localZoom >= 3.95}
-            className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full text-stone-700 hover:bg-stone-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition"
+            className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-sm sm:text-xs font-bold rounded-full text-stone-700 hover:bg-stone-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition touch-manipulation"
             title={locale === 'en' ? 'Zoom In (+)' : 'Perbesar (+)'}
           >
             +
@@ -781,7 +786,7 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
             <button
               type="button"
               onClick={handleResetCameraZoom}
-              className="px-1.5 h-7 flex items-center justify-center text-[11px] font-bold text-blue-700 hover:bg-blue-50 rounded cursor-pointer transition"
+              className="px-2 h-9 sm:h-8 flex items-center justify-center text-xs sm:text-[11px] font-bold text-blue-700 hover:bg-blue-50 rounded-full cursor-pointer transition touch-manipulation"
               title={locale === 'en' ? 'Fit All Leads' : 'Pas Semua Sadapan'}
             >
               ⛶

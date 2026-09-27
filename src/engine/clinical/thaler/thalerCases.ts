@@ -1811,11 +1811,11 @@ export const THALER_EKG_CASES: EKGCase[] = [
         stepIndex: 3,
         stepNumber: 4,
         stepName: "Identifikasi Gelombang Delta (The Delta Wave)",
-        stepNameEn: "Frontal Plane Mean Electrical Axis",
+        stepNameEn: "Identification of the Delta Wave",
         cameraTarget: getCameraForLeads(["V4","V5","I"], 3.5),
         highlightBoxes: ["V4","V5","I"].map(getLeadBounds),
         clinicalFindingTitle: "PATOLOGIS: Slurring Awal Kenaikan Gelombang R (Gelombang Delta)",
-        clinicalFindingTitleEn: "Normal Frontal Axis (+45\u00b0)",
+        clinicalFindingTitleEn: "PATHOLOGIC: Diagnostic Delta Waves Prominent in Leads I, aVL, V4-V6",
         triageStatus: "ABNORMAL",
         plainInstructions: [
           "Perhatikan pangkal kenaikan gelombang R pada sadapan I, V4, dan V5.",
@@ -1823,72 +1823,73 @@ export const THALER_EKG_CASES: EKGCase[] = [
           "Inilah yang disebut Gelombang Delta, tanda tangan patognomonik sindrom Wolff-Parkinson-White."
 ],
         plainInstructionsEn: [
-          "Lead I is positive and Lead aVF is positive.",
-          "The frontal axis is physiological (+45\u00b0).",
+          "Examine the initial slope of the R wave in leads I, aVL, and V4-V6: notice the distinct slurring and gradual slope before the sharp R peak.",
+          "In lead V1, pre-excitation may produce positive delta waves (Type A WPW, left-sided pathway) or negative delta waves resembling Q waves (Type B WPW, right-sided pathway).",
         ],
         thalerRuleQuote: "Gelombang delta adalah lereng miring pada awal QRS yang mencerminkan depolarisasi ventrikel lambat dari sel ke sel saat impuls keluar dari jalur bypass.",
-        thalerRuleQuoteEn: "The frontal plane axis in WPW depends on the anatomical location of the accessory pathway.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_wpw_syndrome"].step4_axis,
+        thalerRuleQuoteEn: "The delta wave represents early, slow myocardial conduction through ventricular muscle before rapid His-Purkinje activation takes over.",
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_wpw_syndrome"].step8_or_9_core_pathology,
       },
       {
         stepIndex: 4,
         stepNumber: 5,
         stepName: "Aksis Bidang Frontal",
-        stepNameEn: "Rhythm Analysis",
+        stepNameEn: "Frontal Plane Mean Electrical Axis",
         cameraTarget: getCameraForLeads(["I","aVF"], 2.2),
         highlightBoxes: ["I","aVF"].map(getLeadBounds),
         clinicalFindingTitle: "Aksis Normal (+65°)",
-        clinicalFindingTitleEn: "Sinus Rhythm with Ventricular Pre-excitation",
+        clinicalFindingTitleEn: "Normal Frontal Axis (+65\u00b0)",
         triageStatus: "NORMAL",
         plainInstructions: [
           "Aksis dalam batas normal."
 ],
         plainInstructionsEn: [
-          "Sinus P waves are present but fuse immediately into the delta wave without an intervening PR segment.",
-          "Regular rhythm during resting baseline recording.",
+          "Lead I is positive and Lead aVF is positive.",
+          "The frontal axis is physiological (+65\u00b0).",
         ],
         thalerRuleQuote: "Defleksi QRS yang positif pada sadapan I dan aVF memastikan vektor depolarisasi berada di kuadran normal (0 hingga +90 derajat).",
-        thalerRuleQuoteEn: "In WPW, sinus P waves merge directly into the QRS complex because the accessory pathway initiates ventricular depolarization without AV nodal delay.",
+        thalerRuleQuoteEn: "The frontal plane axis in WPW depends on the anatomical location of the accessory pathway.",
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_wpw_syndrome"].step4_axis,
       },
       {
         stepIndex: 5,
         stepNumber: 6,
         stepName: "Analisis Irama",
-        stepNameEn: "Bundle Branch Block vs Pre-excitation Differentiation",
+        stepNameEn: "Rhythm Analysis",
         cameraTarget: getCameraForLeads(["II"], 2.6),
         highlightBoxes: ["II"].map(getLeadBounds),
         clinicalFindingTitle: "Irama Sinus Teratur dengan Pra-eksitasi",
-        clinicalFindingTitleEn: "Pseudo-Bundle Branch Block Pattern (Pre-excitation Fusion)",
+        clinicalFindingTitleEn: "Sinus Rhythm with Ventricular Pre-excitation",
         triageStatus: "NORMAL",
         plainInstructions: [
           "Gelombang P sinus mendahului setiap QRS dengan jeda yang sangat singkat."
 ],
         plainInstructionsEn: [
-          "Although the QRS is wide (135 ms), this is NOT a bundle branch block.",
-          "The QRS widening is caused by muscle-to-muscle conduction from the accessory pathway insertion, fusing with normal His-Purkinje conduction.",
+          "Sinus P waves are present but fuse immediately into the delta wave without an intervening PR segment.",
+          "Regular rhythm during resting baseline recording.",
         ],
         thalerRuleQuote: "Setiap gelombang P diikuti oleh kompleks QRS dengan interval PR yang konstan, mencerminkan kepemimpinan nodus SA.",
-        thalerRuleQuoteEn: "A wide QRS with a short PR interval is pre-excitation, not bundle branch block. Bundle branch blocks have normal PR intervals.",
+        thalerRuleQuoteEn: "In WPW, sinus P waves merge directly into the QRS complex because the accessory pathway initiates ventricular depolarization without AV nodal delay.",
       },
       {
         stepIndex: 6,
         stepNumber: 7,
         stepName: "Pemeriksaan Blok Konduksi",
-        stepNameEn: "Identification of the Delta Wave",
+        stepNameEn: "Bundle Branch Block vs Pre-excitation Differentiation",
         cameraTarget: getCameraForLeads(["V1"], 2.5),
         highlightBoxes: ["V1"].map(getLeadBounds),
         clinicalFindingTitle: "Bukan Blok Cabang Berkas (QRS Lebar Akibat Delta Wave)",
-        clinicalFindingTitleEn: "PATHOLOGIC: Diagnostic Delta Waves Prominent in Leads I, aVL, V4-V6",
+        clinicalFindingTitleEn: "Pseudo-Bundle Branch Block Pattern (Pre-excitation Fusion)",
         triageStatus: "NORMAL",
         plainInstructions: [
           "QRS melebar bukan karena blok cabang, melainkan karena fusi depolarisasi jaras aksesoris."
 ],
         plainInstructionsEn: [
-          "Examine the initial slope of the R wave in leads I, aVL, and V4-V6: notice the distinct slurring and gradual slope before the sharp R peak.",
-          "In lead V1, pre-excitation may produce positive delta waves (Type A WPW, left-sided pathway) or negative delta waves resembling Q waves (Type B WPW, right-sided pathway).",
+          "Although the QRS is wide (135 ms), this is NOT a bundle branch block.",
+          "The QRS widening is caused by muscle-to-muscle conduction from the accessory pathway insertion, fusing with normal His-Purkinje conduction.",
         ],
         thalerRuleQuote: "Jangan salah mendiagnosis WPW sebagai RBBB atau LBBB.",
-        thalerRuleQuoteEn: "The delta wave represents early, slow myocardial conduction through ventricular muscle before rapid His-Purkinje activation takes over.",
+        thalerRuleQuoteEn: "A wide QRS with a short PR interval is pre-excitation, not bundle branch block. Bundle branch blocks have normal PR intervals.",
       },
       {
         stepIndex: 7,
@@ -1930,7 +1931,6 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Gelombang delta negatif dapat menipu klinisi dengan meniru gelombang Q patologis infark miokard.",
         thalerRuleQuoteEn: "Delta waves can produce negative deflections in inferior leads that mimic pathological Q waves, known as the WPW pseudo-infarction pattern.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_wpw_syndrome"].step8_or_9_core_pathology,
       }
 
     ],
@@ -2085,7 +2085,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "QRS yang lebar dan laju ventrikel yang sangat lambat (20-40 bpm) menandakan irama lolos ventrikel murni yang tidak stabil.",
         thalerRuleQuoteEn: "A wide QRS complex and a very slow ventricular rate (20-40 bpm) identify an idioventricular escape rhythm, which is fundamentally unreliable and prone to sudden asystole.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_complete_heart_block"].step4_axis,
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_complete_heart_block"].step8_or_9_core_pathology,
       },
       {
         stepIndex: 4,
@@ -2105,6 +2105,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Fokus lolos yang berasal dari dinding miokardium ventrikel menggeser sumbu listrik secara radikal.",
         thalerRuleQuoteEn: "An escape focus originating in ventricular myocardium markedly alters the frontal plane electrical axis.",
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_complete_heart_block"].step4_axis,
       },
       {
         stepIndex: 5,
@@ -2184,7 +2185,6 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Blok jantung total dapat dipicu oleh infark inferior akut atau penyakit degeneratif sistem konduksi (Lenegre disease).",
         thalerRuleQuoteEn: "Third-degree heart block can be caused by acute inferior myocardial infarction or progressive idiopathic fibrosis of the conduction system.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_complete_heart_block"].step8_or_9_core_pathology,
       }
 
     ],
@@ -2328,7 +2328,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Pada RBBB, sadapan V1 (kamera yang melihat langsung ventrikel kanan) merekam gelombang R kedua yang tinggi dan lebar (R prime). Bentuknya klasik menyerupai telinga kelinci.",
         thalerRuleQuoteEn: "In RBBB, lead V1 (which directly overlies the right ventricle) displays a tall second R wave (R prime). Its classic appearance resembles a pair of rabbit ears.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_rbbb"].step4_axis,
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_rbbb"].step8_or_9_core_pathology,
       },
       {
         stepIndex: 4,
@@ -2370,6 +2370,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "RBBB terisolasi tidak mengubah aksis bidang frontal secara drastis.",
         thalerRuleQuoteEn: "Isolated RBBB does not shift the frontal plane axis significantly.",
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_rbbb"].step4_axis,
       },
       {
         stepIndex: 6,
@@ -2429,7 +2430,6 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Kabar baik klinis: infark miokard akut masih dapat didiagnosis dengan kriteria standar pada pasien dengan RBBB.",
         thalerRuleQuoteEn: "Clinical good news: acute myocardial infarction can still be reliably diagnosed with standard criteria in patients with Right Bundle Branch Block.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_rbbb"].step8_or_9_core_pathology,
       }
 
     ],
@@ -2573,7 +2573,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Pada LBBB, cabang berkas kiri yang rusak memaksa septum terdepolarisasi dari kanan ke kiri, membalikkan vektor awal dan melenyapkan gelombang Q septal normal di sadapan lateral.",
         thalerRuleQuoteEn: "In LBBB, the damaged left bundle branch forces the septum to depolarize from right to left, obliterating the normal septal Q waves in lateral leads and producing broad notched R waves.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_lbbb"].step4_axis,
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_lbbb"].step8_or_9_core_pathology,
       },
       {
         stepIndex: 4,
@@ -2616,6 +2616,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Aksis seringkali bergeser ke kiri pada LBBB.",
         thalerRuleQuoteEn: "The electrical axis frequently shifts leftward in Left Bundle Branch Block.",
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_lbbb"].step4_axis,
       },
       {
         stepIndex: 6,
@@ -2677,7 +2678,6 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "LBBB adalah penyamar ulung. Keberadaannya menutupi tanda-tanda infark miokard akut klasik dan memerlukan keahlian khusus atau kriteria Sgarbossa untuk membongkarnya.",
         thalerRuleQuoteEn: "LBBB is the great masquerader. It completely obscures the classic signs of acute myocardial infarction, requiring specialized tools such as the Sgarbossa criteria to detect ischemia.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_lbbb"].step8_or_9_core_pathology,
       }
 
     ],
@@ -2829,7 +2829,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         thalerRuleQuoteEn: "The earliest and most famous ECG sign of hyperkalemia is the development of tall, symmetric, sharply peaked T waves with a narrow base, resembling a pup tent.",
         deepMechanismDetails: "Kadar kalium plasma tinggi mempercepat repolarisasi kalium fase 3 melalui pembukaan saluran IKr, memicu repolarisasi ventrikel serentak yang menghasilkan gelombang T tajam beramplitudo tinggi.",
         deepMechanismDetailsEn: "Elevated extracellular potassium accelerates phase 3 repolarization by augmenting rapid delayed rectifier potassium current (IKr), causing synchronized rapid ventricular repolarization that generates narrow, tall, tented T waves.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_hyperkalemia"].step4_axis,
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_hyperkalemia"].step8_or_9_core_pathology,
       },
       {
         stepIndex: 4,
@@ -2850,6 +2850,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Orientasi vektor rata-rata bidang frontal berada dalam batas normal sebelum terjadinya perubahan fase lanjut.",
         thalerRuleQuoteEn: "The mean frontal electrical axis remains normal in early to moderate hyperkalemia before terminal sine-wave conduction occurs.",
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_hyperkalemia"].step4_axis,
       },
       {
         stepIndex: 5,
@@ -2934,7 +2935,6 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Kalsium glukonat IV segera.",
         thalerRuleQuoteEn: "Calcium gluconate does not lower serum potassium, but it immediately protects the heart by restoring normal myocardial membrane threshold potential.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_hyperkalemia"].step8_or_9_core_pathology,
       }
 
     ],
@@ -3579,7 +3579,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         relevantFormula: "Elevasi ST Difus (I, II, aVF, V3-V6) | Depresi PR (II, V5)",
         relevantFormulaEn: "Diffuse Concave ST Elevation (I, II, aVF, V3-V6) | PR Depression (II, V5)",
         latexFormula: "\\text{Elevasi ST Difus } (I, II, aVF, V_3 - V_6) \\quad | \\quad \\text{Depresi PR } (II, V_5) \\implies \\text{Perikarditis}",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_acute_pericarditis"].step4_axis,
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_acute_pericarditis"].step8_or_9_core_pathology,
       },
       {
         stepIndex: 4,
@@ -3599,6 +3599,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Defleksi QRS yang positif pada sadapan I dan aVF memastikan vektor depolarisasi berada di kuadran normal (0 hingga +90 derajat).",
         thalerRuleQuoteEn: "Positive QRS complexes in leads I and aVF confirm the mean vector points within the normal quadrant.",
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_acute_pericarditis"].step4_axis,
       },
       {
         stepIndex: 5,
@@ -3679,7 +3680,6 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Ingat: memberikan fibrinolisis pada perikarditis akut yang salah dikira STEMI dapat memicu komplikasi fatal perdarahan rongga perikardium dan tamponade jantung!",
         thalerRuleQuoteEn: "Remember: administering thrombolysis to acute pericarditis mistaken for STEMI can trigger catastrophic fatal pericardial hemorrhage and cardiac tamponade!",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_acute_pericarditis"].step8_or_9_core_pathology,
       }
 
     ],
@@ -3821,7 +3821,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Efek digoksin klasik menghasilkan depresi segmen ST yang landai melengkung ke bawah, menyerupai kumis pelukis Salvador Dali. Temuan ini normal dan menandakan kadar obat terapeutik di dalam darah.",
         thalerRuleQuoteEn: "Classic digoxin effect causes gradual downward sloping ST segment depression, resembling the mustache of painter Salvador Dali. This is a normal finding reflecting therapeutic serum drug levels.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_digoxin_effect"].step4_axis,
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_digoxin_effect"].step8_or_9_core_pathology,
       },
       {
         stepIndex: 4,
@@ -3841,6 +3841,7 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Defleksi QRS yang positif pada sadapan I dan aVF memastikan vektor depolarisasi berada di kuadran normal (0 hingga +90 derajat).",
         thalerRuleQuoteEn: "Positive QRS complexes in leads I and aVF confirm the mean vector points within the normal quadrant.",
+        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_digoxin_effect"].step4_axis,
       },
       {
         stepIndex: 5,
@@ -3921,7 +3922,6 @@ export const THALER_EKG_CASES: EKGCase[] = [
         ],
         thalerRuleQuote: "Jangan bingung membedakan efek digoksin normal dengan iskemia miokard.",
         thalerRuleQuoteEn: "Do not confuse the normal scooped ST depression of digoxin with myocardial ischemia.",
-        inSituAnnotation: THALER_IN_SITU_CALIPER_MAP["case_digoxin_effect"].step8_or_9_core_pathology,
       }
 
     ],

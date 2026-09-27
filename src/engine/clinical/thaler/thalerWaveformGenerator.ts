@@ -538,19 +538,25 @@ function getInferiorStemiLeadParams(lead: string): WaveParams {
 
 function getAnteriorStemiLeadParams(lead: string): WaveParams {
   const norm = getNormalLeadParams(lead);
+  const base: WaveParams = {
+    ...norm,
+    prInterval: 0.14,
+    qtInterval: 0.30,
+    tWidth: 0.055,
+  };
   if (lead === 'V1' || lead === 'V2') {
-    return { ...norm, qAmp: 0.35, rAmp: 0.20, sAmp: 0, stElev: 0.45, tAmp: 0.70 }; // Tombstone ST elevation
+    return { ...base, qAmp: 0.35, rAmp: 0.20, sAmp: 0, stElev: 0.45, tAmp: 0.70 }; // Tombstone ST elevation
   }
   if (lead === 'V3' || lead === 'V4') {
-    return { ...norm, qAmp: 0.40, rAmp: 0.30, sAmp: 0, stElev: 0.55, tAmp: 0.85 }; // Marked elevation
+    return { ...base, qAmp: 0.40, rAmp: 0.30, sAmp: 0, stElev: 0.55, tAmp: 0.85 }; // Marked elevation
   }
   if (lead === 'V5') {
-    return { ...norm, stElev: 0.25, tAmp: 0.45 };
+    return { ...base, stElev: 0.25, tAmp: 0.45 };
   }
   if (lead === 'III' || lead === 'aVF') {
-    return { ...norm, stElev: -0.18, tAmp: -0.15 }; // Reciprocal depression
+    return { ...base, stElev: -0.18, tAmp: -0.15 }; // Reciprocal depression
   }
-  return norm;
+  return base;
 }
 
 function getLvhStrainLeadParams(lead: string): WaveParams {
@@ -575,12 +581,24 @@ function getLvhStrainLeadParams(lead: string): WaveParams {
 
 function getAfibLeadParams(lead: string): WaveParams {
   const norm = getNormalLeadParams(lead);
-  return { ...norm, pAmp: 0 }; // Zero P wave
+  return {
+    ...norm,
+    pAmp: 0, // Zero P wave
+    prInterval: 0.10,
+    qtInterval: 0.28,
+    tWidth: 0.055,
+  };
 }
 
 function getAFlutterLeadParams(lead: string): WaveParams {
   const norm = getNormalLeadParams(lead);
-  return { ...norm, pAmp: 0 };
+  return {
+    ...norm,
+    pAmp: 0,
+    prInterval: 0.08,
+    qtInterval: 0.24,
+    tWidth: 0.045,
+  };
 }
 
 function getWpwLeadParams(lead: string): WaveParams {
@@ -599,7 +617,14 @@ function generateEscapeQrs(tInQrs: number, lead: string): number {
   const isV1 = lead === 'V1';
   const isLateral = lead === 'I' || lead === 'V5' || lead === 'V6';
   const amp = isV1 ? -0.8 : (isLateral ? 0.9 : 0.6);
-  return gaussian(tInQrs, qrsCenter, 0.07, amp);
+  const qrs = gaussian(tInQrs, qrsCenter, 0.07, amp);
+
+  // Secondary T wave discordant with main QRS deflection
+  const tCenter = 0.52;
+  const tAmp = -amp * 0.35;
+  const tWave = gaussian(tInQrs, tCenter, 0.10, tAmp);
+
+  return qrs + tWave;
 }
 
 function getRbbbLeadParams(lead: string): WaveParams {
@@ -679,15 +704,15 @@ function getVentricularTachycardiaLeadParams(lead: string): WaveParams {
   return {
     pAmp: 0.0, // AV dissociation / buried P waves
     pWidth: 0.04,
-    prInterval: 0.14,
+    prInterval: 0.02,
     qAmp: 0.0,
     rAmp: isInferior ? -1.35 : (isLateral ? 1.25 : -1.45),
     sAmp: isV1 ? 1.55 : (isLateral ? 0.20 : 0.85),
-    qrsWidth: 0.165, // Broad bizarre QRS
+    qrsWidth: 0.14, // Broad bizarre QRS
     stElev: isInferior ? 0.20 : -0.15,
     tAmp: isInferior ? -0.45 : (isV1 ? 0.40 : -0.35),
-    tWidth: 0.08,
-    qtInterval: 0.29,
+    tWidth: 0.05,
+    qtInterval: 0.24,
   };
 }
 
@@ -710,19 +735,25 @@ function getPosteriorStemiLeadParams(lead: string): WaveParams {
 
 function getPulmonaryEmbolismLeadParams(lead: string): WaveParams {
   const norm = getNormalLeadParams(lead);
+  const base: WaveParams = {
+    ...norm,
+    prInterval: 0.14,
+    qtInterval: 0.28,
+    tWidth: 0.05,
+  };
   if (lead === 'I') {
-    return { ...norm, rAmp: 0.45, sAmp: 0.75 }; // Prominent S in I
+    return { ...base, rAmp: 0.45, sAmp: 0.75 }; // Prominent S in I
   }
   if (lead === 'III') {
-    return { ...norm, qAmp: 0.35, rAmp: 0.55, sAmp: 0.05, tAmp: -0.32 }; // Q and inverted T in III (S1Q3T3)
+    return { ...base, qAmp: 0.35, rAmp: 0.55, sAmp: 0.05, tAmp: -0.32 }; // Q and inverted T in III (S1Q3T3)
   }
   if (lead === 'aVF') {
-    return { ...norm, rAmp: 0.70, sAmp: 0.10 };
+    return { ...base, rAmp: 0.70, sAmp: 0.10 };
   }
   if (lead === 'V1' || lead === 'V2' || lead === 'V3' || lead === 'V4') {
-    return { ...norm, tAmp: -0.35, stElev: -0.05 }; // Anterior RV strain T-wave inversion
+    return { ...base, tAmp: -0.35, stElev: -0.05 }; // Anterior RV strain T-wave inversion
   }
-  return norm;
+  return base;
 }
 
 function getBrugadaType1LeadParams(lead: string): WaveParams {
@@ -742,6 +773,7 @@ function getSevereHypokalemiaLeadParams(lead: string): WaveParams {
   const isMidPrecordial = lead === 'V2' || lead === 'V3' || lead === 'V4';
   return {
     ...norm,
+    qtInterval: 0.32,
     stElev: -0.11, // Diffuse mild ST depression
     tAmp: 0.04,    // Severely flattened T wave
     tWidth: 0.045,

@@ -5,7 +5,7 @@
  * Strictly zero em-dashes (Unicode U+2014 banned).
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Layers, AlertTriangle, CheckCircle2, ShieldAlert, HeartPulse } from 'lucide-react';
 import { useLocale } from '../../locales/useLocale';
 
@@ -20,20 +20,36 @@ export const LeadTerritoryModal: React.FC<LeadTerritoryModalProps> = ({
 }) => {
   const { t } = useLocale();
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const territories = t.leadTerritoryData.territories;
   const pitfalls = t.leadTerritoryData.pitfalls;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs font-sans">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="lead-territory-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs font-sans"
+    >
       <div className="bg-white rounded-xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-3.5 bg-stone-900 text-white shrink-0 border-b border-stone-800">
           <div className="flex items-center space-x-2.5">
             <Layers className="w-5 h-5 text-blue-400" />
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
+              <h3 id="lead-territory-title" className="text-sm sm:text-base font-bold text-white tracking-tight">
                 {t.leadTerritory.modalTitle}
               </h3>
               <p className="text-[11px] text-stone-400">

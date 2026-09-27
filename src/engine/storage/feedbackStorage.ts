@@ -41,12 +41,18 @@ export class FeedbackStorage {
       const parsed = JSON.parse(raw);
       const loaded: UserEngagementData = {
         completedTutorialCases: Array.isArray(parsed.completedTutorialCases) ? parsed.completedTutorialCases : [],
-        completedPracticeSessions: typeof parsed.completedPracticeSessions === 'number' ? parsed.completedPracticeSessions : 0,
+        completedPracticeSessions: typeof parsed.completedPracticeSessions === 'number' && Number.isFinite(parsed.completedPracticeSessions)
+          ? parsed.completedPracticeSessions
+          : 0,
         feedbackStatus: ['UNPROMPTED', 'SUBMITTED', 'DISMISSED', 'REMIND_LATER'].includes(parsed.feedbackStatus)
           ? parsed.feedbackStatus
           : 'UNPROMPTED',
-        lastPromptedTimestamp: typeof parsed.lastPromptedTimestamp === 'number' ? parsed.lastPromptedTimestamp : 0,
-        lastSubmittedRating: typeof parsed.lastSubmittedRating === 'number' ? parsed.lastSubmittedRating : null,
+        lastPromptedTimestamp: typeof parsed.lastPromptedTimestamp === 'number' && Number.isFinite(parsed.lastPromptedTimestamp)
+          ? parsed.lastPromptedTimestamp
+          : 0,
+        lastSubmittedRating: typeof parsed.lastSubmittedRating === 'number' && Number.isFinite(parsed.lastSubmittedRating)
+          ? parsed.lastSubmittedRating
+          : null,
       };
       memoryFeedbackCache = { ...loaded };
       return loaded;

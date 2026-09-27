@@ -8,7 +8,7 @@
  * Strictly zero em-dashes (Unicode U+2014 banned).
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calculator, Heart, ShieldAlert, GitBranch, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 import { EKGCase } from '../../engine/clinical/thaler/thalerTypes';
 import { useLocale } from '../../locales/useLocale';
@@ -24,6 +24,17 @@ type CalcTab = 'QTC' | 'LVH' | 'SGARBOSSA' | 'BRUGADA_WCT';
 export const ClinicalCalculatorsModal: React.FC<Props> = ({ isOpen, onClose, currentCase }) => {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<CalcTab>('QTC');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // 1. QTc Calculator States
   const [qtMs, setQtMs] = useState<number>(currentCase?.metrics.qtcIntervalMs ? Math.round(currentCase.metrics.qtcIntervalMs * 0.9) : 380);
@@ -112,7 +123,12 @@ export const ClinicalCalculatorsModal: React.FC<Props> = ({ isOpen, onClose, cur
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-4 sm:p-6 animate-in fade-in duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="clinical-calculators-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-4 sm:p-6 animate-in fade-in duration-150"
+    >
       <div className="bg-white rounded-xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-5 py-3.5 bg-stone-900 text-white flex items-center justify-between shrink-0">
@@ -121,7 +137,7 @@ export const ClinicalCalculatorsModal: React.FC<Props> = ({ isOpen, onClose, cur
               <Calculator className="w-4 h-4 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold tracking-tight">{calcs.modalTitle}</h2>
+              <h2 id="clinical-calculators-title" className="text-sm font-bold tracking-tight">{calcs.modalTitle}</h2>
               <p className="text-[11px] text-stone-400">{calcs.modalSubtitle}</p>
             </div>
           </div>

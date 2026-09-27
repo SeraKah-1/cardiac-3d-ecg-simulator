@@ -133,8 +133,11 @@ export class ThalerPdfExportEngine {
           navigator.share({
             files: [file],
             title: filename,
-          }).catch(() => {
-            doc.save(filename);
+          }).catch((err: unknown) => {
+            const isAbort = (err instanceof Error && err.name === 'AbortError') || (typeof err === 'object' && err !== null && (err as { name?: string }).name === 'AbortError');
+            if (!isAbort) {
+              doc.save(filename);
+            }
           });
           return;
         }
@@ -394,7 +397,7 @@ export class ThalerPdfExportEngine {
       },
       {
         stage: TRANSLATIONS[locale].practice.stStageTitle,
-        user: `${userAnswers.stMorphology || '-'} | ${userAnswers.ischemiaLeads || '-'}`,
+        user: `${userAnswers.stMorphology || userAnswers.stDeviation || '-'} | ${userAnswers.ischemiaLeads || userAnswers.vascularTerritory || '-'}`,
         truth: `ST Elev: ${caseData.metrics.stElevationLeads.join(',') || t.none} | ST Depr: ${caseData.metrics.stDepressionLeads.join(',') || t.none} | Inv T: ${caseData.metrics.tWaveInversionLeads.join(',') || t.none}`,
       },
       {

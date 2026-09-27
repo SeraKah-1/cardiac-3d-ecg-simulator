@@ -367,7 +367,7 @@ export const THALER_FLOWCHART_STAGES: FlowchartStage[] = [
             diagnosticOutcome: 'Long QTc Syndrome. Waspada Aritmia Maligna Torsades de Pointes.',
             diagnosticOutcomeEn: 'Long QTc Syndrome. High risk for polymorphic VT / Torsades de Pointes.',
             status: 'PATHOLOGIC',
-            targetCaseId: 'case_hyperkalemia',
+            targetCaseId: 'case_severe_hypokalemia',
             targetStepNumber: 3,
           },
           {
@@ -444,7 +444,7 @@ export const THALER_FLOWCHART_STAGES: FlowchartStage[] = [
             diagnosticOutcome: 'Right Axis Deviation (RAD). Etiologi: RVH, Emboli Paru, LPFB.',
             diagnosticOutcomeEn: 'Right Axis Deviation (RAD). Etiology: RVH, Pulmonary Embolism, LPFB.',
             status: 'WARNING',
-            targetCaseId: 'case_rbbb',
+            targetCaseId: 'case_pulmonary_embolism',
             targetStepNumber: 4,
           },
           {
@@ -457,7 +457,7 @@ export const THALER_FLOWCHART_STAGES: FlowchartStage[] = [
             diagnosticOutcome: 'Extreme Right Axis / "No Man\'s Land". Waspada VT atau lead terbalik.',
             diagnosticOutcomeEn: 'Extreme Right Axis / "No Man\'s Land". Consider VT or reversed arm leads.',
             status: 'PATHOLOGIC',
-            targetCaseId: 'case_normal_sinus',
+            targetCaseId: 'case_monomorphic_vt',
             targetStepNumber: 4,
           },
         ],
@@ -508,7 +508,7 @@ export const THALER_FLOWCHART_STAGES: FlowchartStage[] = [
             diagnosticOutcome: 'Pembesaran Atrium Kanan (P Pulmonale).',
             diagnosticOutcomeEn: 'Right Atrial Enlargement (P Pulmonale).',
             status: 'WARNING',
-            targetCaseId: 'case_lvh_strain',
+            targetCaseId: 'case_pulmonary_embolism',
             targetStepNumber: 8,
           },
           {

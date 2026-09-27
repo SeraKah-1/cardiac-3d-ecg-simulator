@@ -6,7 +6,7 @@
  * Strictly zero em-dashes (Unicode U+2014 banned).
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Search, ShieldCheck, Heart, AlertTriangle, Activity, BookOpen } from 'lucide-react';
 import { useLocale } from '../../locales/useLocale';
 
@@ -22,12 +22,28 @@ export const ClinicalPocketCheatSheetModal: React.FC<Props> = ({ isOpen, onClose
   const [activeTab, setActiveTab] = useState<TabType>('NORMAL_INTERVALS');
   const [searchQuery, setSearchQuery] = useState('');
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const content = t.cheatSheetContent;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-2 sm:p-6 animate-in fade-in duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pocket-cheat-sheet-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-2 sm:p-6 animate-in fade-in duration-150"
+    >
       <div className="bg-white rounded-xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="px-5 py-3.5 bg-stone-900 text-white flex items-center justify-between shrink-0">
@@ -36,7 +52,7 @@ export const ClinicalPocketCheatSheetModal: React.FC<Props> = ({ isOpen, onClose
               <BookOpen className="w-4 h-4 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold tracking-tight">{t.cheatSheet.modalTitle}</h2>
+              <h2 id="pocket-cheat-sheet-title" className="text-sm font-bold tracking-tight">{t.cheatSheet.modalTitle}</h2>
               <p className="text-[11px] text-stone-400">{t.cheatSheet.modalSubtitle}</p>
             </div>
           </div>
@@ -105,8 +121,18 @@ export const ClinicalPocketCheatSheetModal: React.FC<Props> = ({ isOpen, onClose
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.cheatSheet.searchPlaceholder}
-              className="w-full bg-white border border-stone-300 rounded-md pl-8 pr-2.5 py-1 text-base sm:text-xs text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-blue-500 font-sans"
+              className="w-full bg-white border border-stone-300 rounded-md pl-8 pr-7 py-1 text-base sm:text-xs text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-blue-500 font-sans"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
 

@@ -6,7 +6,7 @@
  * Strictly zero em-dashes (Unicode U+2014 banned).
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Star,
   MessageSquare,
@@ -36,6 +36,18 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isAutomaticPrompt = false,
 }) => {
   const { t, locale } = useLocale();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const [rating, setRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [category, setCategory] = useState<string>(t.feedback.categories[0]);
@@ -153,6 +165,9 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="feedback-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/65 backdrop-blur-xs font-sans animate-in fade-in duration-150"
       onClick={onClose}
     >
@@ -167,7 +182,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               <MessageSquare className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
+              <h3 id="feedback-modal-title" className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
                 <span>{t.feedback.title}</span>
                 {isAutomaticPrompt && (
                   <span className="px-1.5 py-0.2 bg-purple-600/60 border border-purple-400/40 rounded text-[9.5px] font-mono">
