@@ -640,6 +640,48 @@ export const enTranslations: TranslationDictionary = {
     partialStatus: 'Partial Match',
     closeStatus: 'Close Match',
     noStElevation: 'No significant ST elevation reported',
+    // Stage 1: Technical Preflight & Calibration
+    stage1CalibrationTitle: 'Stage 1: Technical Quality & Paper Calibration (Preflight)',
+    stage1CalibrationHint: 'Verify calibration pulse mark and paper speed before measuring waveforms:',
+    calibrationPaperSpeedLabel: 'Paper Speed:',
+    calibrationPaperSpeedStandard: '25 mm/s (Clinical Standard)',
+    calibrationPaperSpeedNonStandard: '50 mm/s (Non-standard / High-speed)',
+    calibrationVoltageLabel: 'Voltage Sensitivity:',
+    calibrationVoltageStandard: '10 mm/mV (1.0 mV = 10 mm / Normal)',
+    calibrationVoltageHalf: '5 mm/mV (Half-Standard / 0.5 mV)',
+    calibrationVoltageDouble: '20 mm/mV (Double-Standard / 2.0 mV)',
+    calibrationAvrLabel: 'Lead aVR Orientation (Lead Placement):',
+    calibrationAvrNegative: 'Inverted / Negative (Normal Placement)',
+    calibrationAvrPositive: 'Positive / Upright (Suspect Arm Lead Reversal or Dextrocardia)',
+    // Stage 2: Heart Rate
+    stage2RateTitle: 'Stage 2: Heart Rate Determination',
+    // Stage 3: Rhythm
+    stage3RhythmTitle: 'Stage 3: Rhythm & Regularity',
+    // Stage 4: Axis
+    stage4AxisTitle: 'Stage 4: Electrical Frontal Axis',
+    // Stage 5: Intervals & Conduction
+    stage5IntervalsTitle: 'Stage 5: Conduction Intervals (PR, QRS, QTc)',
+    qtcLabel: 'QTc Interval Evaluation (Bazett Formula):',
+    qtcPlaceholder: 'Select QTc status...',
+    qtcNormal: 'Normal (Men < 440 ms, Women < 460 ms)',
+    qtcProlonged: 'Prolonged (> 460 ms / TdP Risk)',
+    qtcShortened: 'Shortened (< 350 ms / Hypercalcemia)',
+    // Stage 6: Chamber Enlargement & Hypertrophy
+    stage6HypertrophyTitle: 'Stage 6: Chamber Enlargement & Hypertrophy',
+    stage6HypertrophyHint: 'Examine voltage criteria and morphology of P waves and QRS complexes:',
+    atrialEnlargementLabel: 'Atrial Enlargement (P-pulmonale / P-mitrale):',
+    atrialNormal: 'Normal / No Atrial Enlargement',
+    atrialRae: 'Right Atrial Enlargement (RAE / P-pulmonale > 2.5 mm in II)',
+    atrialLae: 'Left Atrial Enlargement (LAE / P-mitrale notched in II / biphasic in V1)',
+    ventricularHypertrophyLabel: 'Ventricular Hypertrophy & Strain Patterns:',
+    ventricularNormal: 'Normal / No Hypertrophy Criteria Met',
+    ventricularLvh: 'Left Ventricular Hypertrophy (LVH - Sokolow-Lyon S_V1 + R_V5 >= 35 mm)',
+    ventricularLvhStrain: 'LVH with Secondary Repolarization Strain Pattern (Lateral ST Depression & T Inversion)',
+    ventricularRvh: 'Right Ventricular Hypertrophy (RVH - R > S in V1 / Right Axis Deviation)',
+    // Stage 7: Ischemia & ST-T
+    stage7StTitle: 'Stage 7: ST-T Morphology & Ischemic Territory',
+    // Stage 8: Synthesis & Triage
+    stage8SynthesisTitle: 'Stage 8: Clinical Synthesis, Triage & Definitive Diagnosis',
   },
   completion: {
     foundationDoneBadge: 'Foundation Completed',

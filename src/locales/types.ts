@@ -498,6 +498,48 @@ export interface TranslationDictionary {
     partialStatus: string;
     closeStatus: string;
     noStElevation: string;
+    // Stage 1: Technical Preflight & Calibration
+    stage1CalibrationTitle: string;
+    stage1CalibrationHint: string;
+    calibrationPaperSpeedLabel: string;
+    calibrationPaperSpeedStandard: string;
+    calibrationPaperSpeedNonStandard: string;
+    calibrationVoltageLabel: string;
+    calibrationVoltageStandard: string;
+    calibrationVoltageHalf: string;
+    calibrationVoltageDouble: string;
+    calibrationAvrLabel: string;
+    calibrationAvrNegative: string;
+    calibrationAvrPositive: string;
+    // Stage 2: Heart Rate
+    stage2RateTitle: string;
+    // Stage 3: Rhythm
+    stage3RhythmTitle: string;
+    // Stage 4: Axis
+    stage4AxisTitle: string;
+    // Stage 5: Intervals & Conduction
+    stage5IntervalsTitle: string;
+    qtcLabel: string;
+    qtcPlaceholder: string;
+    qtcNormal: string;
+    qtcProlonged: string;
+    qtcShortened: string;
+    // Stage 6: Chamber Enlargement & Hypertrophy
+    stage6HypertrophyTitle: string;
+    stage6HypertrophyHint: string;
+    atrialEnlargementLabel: string;
+    atrialNormal: string;
+    atrialRae: string;
+    atrialLae: string;
+    ventricularHypertrophyLabel: string;
+    ventricularNormal: string;
+    ventricularLvh: string;
+    ventricularLvhStrain: string;
+    ventricularRvh: string;
+    // Stage 7: Ischemia & ST-T
+    stage7StTitle: string;
+    // Stage 8: Synthesis & Triage
+    stage8SynthesisTitle: string;
   };
   completion: {
     foundationDoneBadge: string;

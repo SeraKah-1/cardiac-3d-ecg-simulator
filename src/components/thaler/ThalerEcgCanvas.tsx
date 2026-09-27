@@ -74,6 +74,24 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     mv: number;
   } | null>(null);
 
+  // Interactive Zoom & Pan State (Multi-touch Pinch, Wheel, and Drag Support)
+  const [localZoom, setLocalZoom] = useState<number>(camera.zoomLevel);
+  const [localCenterX, setLocalCenterX] = useState<number>(camera.centerPercentX);
+  const [localCenterY, setLocalCenterY] = useState<number>(camera.centerPercentY);
+  const [isGestureActive, setIsGestureActive] = useState<boolean>(false);
+
+  // Synchronize local camera with external camera prop changes
+  useEffect(() => {
+    setLocalZoom(camera.zoomLevel);
+    setLocalCenterX(camera.centerPercentX);
+    setLocalCenterY(camera.centerPercentY);
+  }, [camera.zoomLevel, camera.centerPercentX, camera.centerPercentY]);
+
+  // Pointer tracking for multi-touch pinch-to-zoom and panning
+  const activePointers = useRef<Map<number, { clientX: number; clientY: number }>>(new Map());
+  const pinchInitialRef = useRef<{ initialDist: number; initialZoom: number } | null>(null);
+  const panInitialRef = useRef<{ startX: number; startY: number; initialCenterX: number; initialCenterY: number } | null>(null);
+
   // Notify parent of canvas element
   useEffect(() => {
     if (onCanvasRef && canvasRef.current) {
@@ -378,11 +396,11 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     renderEcg();
   }, [renderEcg]);
 
-  // Target-Anchored Camera Centering Transformation
+  // Target-Anchored Camera Centering Transformation with Smooth Interpolation
   const cameraTransform = useMemo(() => {
-    const zoom = Math.max(1.0, camera.zoomLevel);
-    const targetPercentX = camera.centerPercentX;
-    const targetPercentY = camera.centerPercentY;
+    const zoom = Math.max(1.0, localZoom);
+    const targetPercentX = Math.min(95, Math.max(5, localCenterX));
+    const targetPercentY = Math.min(95, Math.max(5, localCenterY));
 
     const translateX = 50 - targetPercentX;
     const translateY = 50 - targetPercentY;
@@ -390,13 +408,59 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     return {
       transformOrigin: `${targetPercentX}% ${targetPercentY}%`,
       transform: `translate3d(${translateX}%, ${translateY}%, 0) scale(${zoom})`,
-      transition: 'transform 380ms cubic-bezier(0.16, 1, 0.3, 1)',
+      transition: isGestureActive ? 'none' : 'transform 280ms cubic-bezier(0.16, 1, 0.3, 1)',
     };
-  }, [camera]);
+  }, [localZoom, localCenterX, localCenterY, isGestureActive]);
 
-  // Caliper Pointer Handlers (Unified Touch, Mouse, and Stylus with Zoom-Immune Coordinates)
+  // Zoom control helpers
+  const handleZoomIn = () => {
+    setLocalZoom((prev) => Math.min(4.0, Number((prev + 0.25).toFixed(2))));
+  };
+
+  const handleZoomOut = () => {
+    setLocalZoom((prev) => {
+      const next = Math.max(1.0, Number((prev - 0.25).toFixed(2)));
+      if (next <= 1.05) {
+        setLocalCenterX(50);
+        setLocalCenterY(50);
+      }
+      return next;
+    });
+  };
+
+  const handleResetCameraZoom = () => {
+    onResetCamera();
+    setLocalZoom(1.0);
+    setLocalCenterX(50);
+    setLocalCenterY(50);
+  };
+
+  // Wheel zoom listener attached to container
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY < 0 ? 0.20 : -0.20;
+      setLocalZoom((prev) => {
+        const next = Math.min(4.0, Math.max(1.0, Number((prev + zoomDelta).toFixed(2))));
+        if (next <= 1.05) {
+          setLocalCenterX(50);
+          setLocalCenterY(50);
+        }
+        return next;
+      });
+    };
+
+    container.addEventListener('wheel', handleNativeWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleNativeWheel);
+  }, []);
+
+  // Caliper & Touch Gesture Pointer Handlers
   const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isCaliperActive) return;
+    activePointers.current.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -405,71 +469,146 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
-      // Ignored if capture unsupported
+      // Ignored
     }
 
-    const x = ((e.clientX - rect.left) / rect.width) * CANVAS_WIDTH_PX;
-    const y = ((e.clientY - rect.top) / rect.height) * CANVAS_HEIGHT_PX;
+    // 2 Pointers: Initiate multi-touch Pinch to Zoom
+    if (activePointers.current.size === 2) {
+      const pts = Array.from(activePointers.current.values());
+      const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+      pinchInitialRef.current = {
+        initialDist: dist,
+        initialZoom: localZoom,
+      };
+      panInitialRef.current = null;
+      setIsGestureActive(true);
+      if (isDraggingCaliper) {
+        setIsDraggingCaliper(false);
+        setCaliperStart(null);
+      }
+      return;
+    }
 
-    setIsDraggingCaliper(true);
-    setCaliperStart({ x, y });
-    setCaliperCurrent({ x, y });
-    setCaliperResult(null);
+    // 1 Pointer: Caliper measurement OR 1-finger Pan when zoomed
+    if (activePointers.current.size === 1) {
+      if (isCaliperActive) {
+        const x = ((e.clientX - rect.left) / rect.width) * CANVAS_WIDTH_PX;
+        const y = ((e.clientY - rect.top) / rect.height) * CANVAS_HEIGHT_PX;
+        setIsDraggingCaliper(true);
+        setCaliperStart({ x, y });
+        setCaliperCurrent({ x, y });
+        setCaliperResult(null);
+      } else if (localZoom > 1.05) {
+        panInitialRef.current = {
+          startX: e.clientX,
+          startY: e.clientY,
+          initialCenterX: localCenterX,
+          initialCenterY: localCenterY,
+        };
+        setIsGestureActive(true);
+      }
+    }
   };
 
   const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isCaliperActive || !isDraggingCaliper || !caliperStart) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
+    activePointers.current.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
 
-    let x = ((e.clientX - rect.left) / rect.width) * CANVAS_WIDTH_PX;
-    let y = ((e.clientY - rect.top) / rect.height) * CANVAS_HEIGHT_PX;
-
-    // Shift key locks orthogonal movement (pure horizontal or pure vertical)
-    if (e.shiftKey) {
-      const dx = Math.abs(x - caliperStart.x);
-      const dy = Math.abs(y - caliperStart.y);
-      if (dx >= dy) {
-        y = caliperStart.y; // Lock horizontal
-      } else {
-        x = caliperStart.x; // Lock vertical
+    // Handle 2-finger Pinch Zoom
+    if (activePointers.current.size === 2 && pinchInitialRef.current) {
+      const pts = Array.from(activePointers.current.values());
+      const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+      if (pinchInitialRef.current.initialDist > 0) {
+        const scaleRatio = dist / pinchInitialRef.current.initialDist;
+        const newZoom = Math.min(4.0, Math.max(1.0, pinchInitialRef.current.initialZoom * scaleRatio));
+        setLocalZoom(Number(newZoom.toFixed(2)));
+        if (newZoom <= 1.05) {
+          setLocalCenterX(50);
+          setLocalCenterY(50);
+        }
       }
+      return;
     }
 
-    setCaliperCurrent({ x, y });
+    // Handle 1-finger Pan when zoomed
+    if (activePointers.current.size === 1 && panInitialRef.current && !isCaliperActive && localZoom > 1.05) {
+      const deltaX = e.clientX - panInitialRef.current.startX;
+      const deltaY = e.clientY - panInitialRef.current.startY;
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          const pctDeltaX = (deltaX / rect.width) * (100 / localZoom);
+          const pctDeltaY = (deltaY / rect.height) * (100 / localZoom);
+          const newCenterX = Math.min(95, Math.max(5, panInitialRef.current.initialCenterX - pctDeltaX));
+          const newCenterY = Math.min(95, Math.max(5, panInitialRef.current.initialCenterY - pctDeltaY));
+          setLocalCenterX(newCenterX);
+          setLocalCenterY(newCenterY);
+        }
+      }
+      return;
+    }
 
-    const dxPx = Math.abs(x - caliperStart.x);
-    const dyPx = Math.abs(y - caliperStart.y);
-    const mmX = dxPx / PX_PER_MM;
-    const mmY = dyPx / PX_PER_MM;
-    // 1 mm = 0.04s, 1 mm = 0.1 mV
-    const sec = mmX * 0.04;
-    const mv = mmY * 0.10;
+    // Handle Caliper Drag
+    if (isCaliperActive && isDraggingCaliper && caliperStart) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
 
-    setCaliperResult({ mmX, mmY, sec, mv });
+      let x = ((e.clientX - rect.left) / rect.width) * CANVAS_WIDTH_PX;
+      let y = ((e.clientY - rect.top) / rect.height) * CANVAS_HEIGHT_PX;
+
+      if (e.shiftKey) {
+        const dx = Math.abs(x - caliperStart.x);
+        const dy = Math.abs(y - caliperStart.y);
+        if (dx >= dy) {
+          y = caliperStart.y;
+        } else {
+          x = caliperStart.x;
+        }
+      }
+
+      setCaliperCurrent({ x, y });
+
+      const dxPx = Math.abs(x - caliperStart.x);
+      const dyPx = Math.abs(y - caliperStart.y);
+      const mmX = dxPx / PX_PER_MM;
+      const mmY = dyPx / PX_PER_MM;
+      const sec = mmX * 0.04;
+      const mv = mmY * 0.10;
+
+      setCaliperResult({ mmX, mmY, sec, mv });
+    }
   };
 
   const handleCanvasPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    activePointers.current.delete(e.pointerId);
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
       // Ignored
     }
-    setIsDraggingCaliper(false);
+
+    if (activePointers.current.size < 2) {
+      pinchInitialRef.current = null;
+    }
+    if (activePointers.current.size === 0) {
+      panInitialRef.current = null;
+      setIsGestureActive(false);
+      setIsDraggingCaliper(false);
+    }
   };
 
   // Double tap / click to toggle zoom on mobile and desktop
   const handleCanvasDoubleClick = () => {
-    if (camera.zoomLevel >= 1.6) {
-      onResetCamera();
+    if (localZoom >= 1.5) {
+      handleResetCameraZoom();
     } else if (onZoomToFeature) {
       onZoomToFeature();
     }
   };
 
-  // Keyboard shortcut: Z key toggles zoom (guarded against active form inputs)
+  // Keyboard shortcut: Z key toggles zoom
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const active = document.activeElement;
@@ -478,8 +617,8 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
       }
 
       if ((e.key === 'z' || e.key === 'Z') && !e.ctrlKey && !e.metaKey) {
-        if (camera.zoomLevel >= 1.6) {
-          onResetCamera();
+        if (localZoom >= 1.5) {
+          handleResetCameraZoom();
         } else if (onZoomToFeature) {
           onZoomToFeature();
         }
@@ -487,9 +626,9 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [camera.zoomLevel, onResetCamera, onZoomToFeature]);
+  }, [localZoom, onZoomToFeature]);
 
-  const isZoomed = camera.zoomLevel >= 1.6;
+  const isZoomed = localZoom >= 1.5;
 
   return (
     <div className="flex flex-col h-full bg-stone-100 border border-stone-300 select-none overflow-hidden rounded-md shadow-xs">
@@ -500,7 +639,7 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
             {t.common.appTitle}
           </span>
           <span className="text-stone-500 hidden sm:inline text-[11px]">
-            {t.telemetry.leadFocus}: <strong className="text-stone-800">{camera.focusLeads.join(', ')}</strong> ({camera.zoomLevel.toFixed(1)}x)
+            {t.telemetry.leadFocus}: <strong className="text-stone-800">{camera.focusLeads.join(', ')}</strong> ({localZoom.toFixed(1)}x)
           </span>
           <span className="text-stone-500 hidden md:inline text-[11px]">
             {activeStepName}
@@ -547,16 +686,16 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
           {/* 1-Click Zoom Toggle Button */}
           {isZoomed ? (
             <button
-              onClick={onResetCamera}
+              onClick={handleResetCameraZoom}
               className="px-2.5 py-1 bg-white hover:bg-stone-50 text-stone-800 text-xs font-sans font-semibold rounded border border-stone-300 shadow-2xs transition cursor-pointer flex items-center space-x-1"
               title={t.common.zoomFullTooltip}
             >
               <span>⛶</span>
-              <span>{t.common.zoomFull} (1.0x)</span>
+              <span>{t.common.zoomFull} ({localZoom.toFixed(1)}x)</span>
             </button>
           ) : (
             <button
-              onClick={onZoomToFeature || onResetCamera}
+              onClick={onZoomToFeature || handleZoomIn}
               className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-sans font-semibold rounded border border-blue-200 shadow-2xs transition cursor-pointer flex items-center space-x-1"
               title={t.common.zoomWaveTooltip}
             >
@@ -571,10 +710,10 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
       <div
         ref={containerRef}
         className="relative flex-1 bg-stone-200/60 overflow-hidden flex items-center justify-center p-2"
-        style={{ cursor: isCaliperActive ? 'crosshair' : 'default' }}
+        style={{ cursor: isCaliperActive ? 'crosshair' : localZoom > 1.05 ? 'grab' : 'default' }}
       >
         <div
-          className="relative aspect-[275/180] max-h-full max-w-full shadow-md transition-transform"
+          className="relative aspect-[275/180] max-h-full max-w-full shadow-md"
           style={{
             ...cameraTransform,
           }}
@@ -594,6 +733,46 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
               touchAction: 'none',
             }}
           />
+        </div>
+
+        {/* Floating Interactive Zoom & Pan Toolbar Pill Overlay */}
+        <div className="absolute bottom-3 right-3 flex items-center bg-white/95 backdrop-blur-md rounded-full shadow-md border border-stone-200 px-1 py-0.5 space-x-1 z-20">
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            disabled={localZoom <= 1.05}
+            className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full text-stone-700 hover:bg-stone-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition"
+            title={locale === 'en' ? 'Zoom Out (-)' : 'Perkecil (-)'}
+          >
+            -
+          </button>
+          <button
+            type="button"
+            onClick={handleResetCameraZoom}
+            className="px-2 h-7 flex items-center justify-center font-mono text-[11px] font-bold text-stone-800 hover:bg-stone-100 rounded cursor-pointer transition"
+            title={locale === 'en' ? 'Reset to 1.0x (Fit)' : 'Kembalikan ke 1.0x (Pas)'}
+          >
+            {localZoom.toFixed(1)}x
+          </button>
+          <button
+            type="button"
+            onClick={handleZoomIn}
+            disabled={localZoom >= 3.95}
+            className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full text-stone-700 hover:bg-stone-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition"
+            title={locale === 'en' ? 'Zoom In (+)' : 'Perbesar (+)'}
+          >
+            +
+          </button>
+          {localZoom > 1.05 && (
+            <button
+              type="button"
+              onClick={handleResetCameraZoom}
+              className="px-1.5 h-7 flex items-center justify-center text-[11px] font-bold text-blue-700 hover:bg-blue-50 rounded cursor-pointer transition"
+              title={locale === 'en' ? 'Fit All Leads' : 'Pas Semua Sadapan'}
+            >
+              ⛶
+            </button>
+          )}
         </div>
       </div>
 

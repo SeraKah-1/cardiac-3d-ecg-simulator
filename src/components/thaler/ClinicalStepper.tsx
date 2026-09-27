@@ -46,7 +46,7 @@ export const ClinicalStepper: React.FC<ClinicalStepperProps> = ({
         {steps.map((step, idx) => {
           const isCompleted = idx < currentStepIndex;
           const isActive = idx === currentStepIndex;
-          const stepNum = step.stepNumber ?? (idx + 1);
+          const stepNum = (step.stepNumber && step.stepNumber > 0) ? step.stepNumber : (idx + 1);
 
           return (
             <button

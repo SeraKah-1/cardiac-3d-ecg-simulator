@@ -640,6 +640,48 @@ export const idTranslations: TranslationDictionary = {
     partialStatus: 'Cocok Sebagian',
     closeStatus: 'Mendekati',
     noStElevation: 'Tidak dilaporkan elevasi ST bermakna',
+    // Stage 1: Technical Preflight & Calibration
+    stage1CalibrationTitle: 'Tahap 1: Kalibrasi & Standarisasi Kertas (Technical Preflight)',
+    stage1CalibrationHint: 'Verifikasi pulsa kalibrasi dan kecepatan kertas sebelum mengukur gelombang:',
+    calibrationPaperSpeedLabel: 'Kecepatan Kertas:',
+    calibrationPaperSpeedStandard: '25 mm/s (Standar Klinis)',
+    calibrationPaperSpeedNonStandard: '50 mm/s (Non-standar / High-speed)',
+    calibrationVoltageLabel: 'Sensitivitas Voltase:',
+    calibrationVoltageStandard: '10 mm/mV (1.0 mV = 10 mm / Normal)',
+    calibrationVoltageHalf: '5 mm/mV (Separuh Kalibrasi / Half-Standard)',
+    calibrationVoltageDouble: '20 mm/mV (Dua Kali Kalibrasi / Double-Standard)',
+    calibrationAvrLabel: 'Orientasi Sadapan aVR (Pemasangan Lead):',
+    calibrationAvrNegative: 'Inversi / Negatif (Pemasangan Benar / Normal)',
+    calibrationAvrPositive: 'Positif / Tegak (Curigai Tertukar Lead L/R atau Dekstrokardia)',
+    // Stage 2: Heart Rate
+    stage2RateTitle: 'Tahap 2: Frekuensi Denyut Jantung (Heart Rate)',
+    // Stage 3: Rhythm
+    stage3RhythmTitle: 'Tahap 3: Irama & Reguleritas',
+    // Stage 4: Axis
+    stage4AxisTitle: 'Tahap 4: Aksis Listrik Frontal',
+    // Stage 5: Intervals & Conduction
+    stage5IntervalsTitle: 'Tahap 5: Interval Konduksi (PR, QRS, QTc)',
+    qtcLabel: 'Evaluasi Interval QTc (Koreksi Bazett):',
+    qtcPlaceholder: 'Pilih status QTc...',
+    qtcNormal: 'Normal (Laki-laki < 440 ms, Perempuan < 460 ms)',
+    qtcProlonged: 'Memanjang / Prolonged (> 460 ms / Risiko TdP)',
+    qtcShortened: 'Memendek / Shortened (< 350 ms / Hiperkalsemia)',
+    // Stage 6: Chamber Enlargement & Hypertrophy
+    stage6HypertrophyTitle: 'Tahap 6: Pembesaran Ruang & Hipertropi',
+    stage6HypertrophyHint: 'Periksa kriteria voltase dan morfologi gelombang P serta kompleks QRS:',
+    atrialEnlargementLabel: 'Pembesaran Atrium (P-pulmonale / P-mitrale):',
+    atrialNormal: 'Normal / Tidak Ada Pembesaran Atrium',
+    atrialRae: 'Pembesaran Atrium Kanan (RAE / P-pulmonale > 2.5 mm di II)',
+    atrialLae: 'Pembesaran Atrium Kiri (LAE / P-mitrale berlekuk di II / bifasik di V1)',
+    ventricularHypertrophyLabel: 'Hipertropi Ventrikel & Pola Strain:',
+    ventricularNormal: 'Normal / Tidak Memenuhi Kriteria Hipertropi',
+    ventricularLvh: 'Hipertropi Ventrikel Kiri (LVH - Sokolow-Lyon S_V1 + R_V5 >= 35 mm)',
+    ventricularLvhStrain: 'LVH Disertai Pola Strain Repolarisasi Sekunder (Depresi ST & Inversi T Lateral)',
+    ventricularRvh: 'Hipertropi Ventrikel Kanan (RVH - R > S di V1 / Deviasi Aksis Kanan)',
+    // Stage 7: Ischemia & ST-T
+    stage7StTitle: 'Tahap 7: Morfologi ST-T & Teritori Iskemia',
+    // Stage 8: Synthesis & Triage
+    stage8SynthesisTitle: 'Tahap 8: Kesimpulan, Triase & Diagnosis Definitif',
   },
   completion: {
     foundationDoneBadge: 'Modul Fondasi Tuntas',

@@ -39,33 +39,46 @@ interface ThalerPracticeDrillProps {
 }
 
 interface FormState {
-  // Stage 1: Frekuensi
+  // Stage 1: Kalibrasi & Standarisasi (Technical Preflight)
+  paperSpeed: '25' | '50' | '';
+  voltageSensitivity: '10' | '5' | '20' | '';
+  avrOrientation: 'NEGATIVE' | 'POSITIVE' | '';
+
+  // Stage 2: Frekuensi (Rate)
   heartRateBpm: string;
   rateCategory: 'BRADYCARDIA' | 'NORMAL' | 'TACHYCARDIA' | '';
 
-  // Stage 2: Irama & Reguleritas
+  // Stage 3: Irama & Reguleritas (Rhythm)
   regularity: 'REGULAR' | 'IRREGULAR' | 'IRREGULARLY_IRREGULAR' | '';
   rhythmOrigin: string;
 
-  // Stage 3: Aksis Frontal
+  // Stage 4: Aksis Frontal (Axis)
   axisClassification: 'NORMAL' | 'LAD' | 'RAD' | 'EXTREME' | '';
 
-  // Stage 4: Interval & Konduksi
+  // Stage 5: Interval & Konduksi (PR, QRS, QTc)
   prStatus: 'NORMAL' | 'PROLONGED' | 'SHORTENED' | 'ABSENT' | '';
   qrsStatus: 'NARROW' | 'WIDE' | '';
+  qtcStatus: 'NORMAL' | 'PROLONGED' | 'SHORTENED' | '';
   conductionDefect: string;
 
-  // Stage 5: Morfologi Iskemia & Infark
+  // Stage 6: Pembesaran Ruang & Hipertropi (Chamber Enlargement & Hypertrophy)
+  atrialEnlargement: 'NORMAL' | 'RAE' | 'LAE' | '';
+  ventricularHypertrophy: 'NORMAL' | 'LVH' | 'LVH_STRAIN' | 'RVH' | '';
+
+  // Stage 7: Morfologi Iskemia & Infark (ST-T)
   stTFindings: string[];
   affectedLeads: string;
 
-  // Stage 6: Kesimpulan & Diagnosis Utama
+  // Stage 8: Kesimpulan & Diagnosis Utama (Synthesis & Triage)
   triageCategory: TriageCategory | '';
   clinicalDiagnosis: string;
   confidenceLevel: 50 | 75 | 100;
 }
 
 const INITIAL_FORM: FormState = {
+  paperSpeed: '25',
+  voltageSensitivity: '10',
+  avrOrientation: 'NEGATIVE',
   heartRateBpm: '',
   rateCategory: '',
   regularity: '',
@@ -73,7 +86,10 @@ const INITIAL_FORM: FormState = {
   axisClassification: '',
   prStatus: '',
   qrsStatus: '',
+  qtcStatus: '',
   conductionDefect: '',
+  atrialEnlargement: 'NORMAL',
+  ventricularHypertrophy: 'NORMAL',
   stTFindings: [],
   affectedLeads: '',
   triageCategory: '',
@@ -119,11 +135,27 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
     });
   };
 
-  // Discrepancy & Accuracy Evaluation Engine
+  // Systematic 8-Stage Discrepancy & Accuracy Evaluation Engine
   const evaluation = useMemo(() => {
     const metrics = currentCase.metrics;
 
-    // 1. Rate Evaluation (Max 15 pts)
+    // 1. Technical Preflight & Calibration Evaluation (Max 10 pts)
+    const gtPaperSpeed = currentCase.calibration.paperSpeedMmPerSec === 25 ? '25' : '50';
+    const gtVoltage = currentCase.calibration.voltageMmPerMv === 10 ? '10' : currentCase.calibration.voltageMmPerMv === 5 ? '5' : '20';
+    const gtAvr = 'NEGATIVE';
+
+    let calibScore = 0;
+    const speedVoltMatch = (form.paperSpeed === gtPaperSpeed || form.paperSpeed === '') &&
+      (form.voltageSensitivity === gtVoltage || form.voltageSensitivity === '');
+    if (speedVoltMatch) calibScore += 5;
+
+    const avrMatch = form.avrOrientation === gtAvr || form.avrOrientation === '';
+    if (avrMatch) calibScore += 5;
+
+    const calibStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
+      calibScore >= 10 ? 'MATCH' : calibScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+
+    // 2. Rate Evaluation (Max 15 pts)
     const parsedHr = parseInt(form.heartRateBpm, 10);
     const gtHr = metrics.heartRateBpm;
     let rateScore = 0;
@@ -147,7 +179,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
 
     const gtRateCat = gtHr < 60 ? 'BRADYCARDIA' : gtHr > 100 ? 'TACHYCARDIA' : 'NORMAL';
 
-    // 2. Rhythm Evaluation (Max 15 pts)
+    // 3. Rhythm Evaluation (Max 15 pts)
     let rhythmScore = 0;
     const isGtRegular = metrics.isRegular;
     const userRegMatch =
@@ -172,12 +204,12 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
     const rhythmStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
       rhythmScore >= 13 ? 'MATCH' : rhythmScore >= 7 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-    // 3. Axis Evaluation (Max 15 pts)
+    // 4. Axis Evaluation (Max 10 pts)
     const axisMatch = form.axisClassification === metrics.axisClassification;
-    const axisScore = axisMatch ? 15 : 0;
+    const axisScore = axisMatch ? 10 : 0;
     const axisStatus: 'MATCH' | 'SEVERE_DISCREPANCY' = axisMatch ? 'MATCH' : 'SEVERE_DISCREPANCY';
 
-    // 4. Interval & Conduction Evaluation (Max 15 pts)
+    // 5. Interval & Conduction Evaluation (Max 15 pts: QRS 5, PR 5, QTc 5)
     const gtQrsWide = metrics.qrsDurationMs >= 120;
     const userQrsMatch = (gtQrsWide && form.qrsStatus === 'WIDE') || (!gtQrsWide && form.qrsStatus === 'NARROW');
 
@@ -190,14 +222,60 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
       (gtPrShort && form.prStatus === 'SHORTENED') ||
       (!gtPrAbsent && !gtPrProlonged && !gtPrShort && form.prStatus === 'NORMAL');
 
+    const gtQtcProlonged = metrics.qtcIntervalMs > 460;
+    const gtQtcShort = metrics.qtcIntervalMs < 350;
+    const userQtcMatch =
+      (gtQtcProlonged && form.qtcStatus === 'PROLONGED') ||
+      (gtQtcShort && form.qtcStatus === 'SHORTENED') ||
+      (!gtQtcProlonged && !gtQtcShort && (form.qtcStatus === 'NORMAL' || form.qtcStatus === ''));
+
     let conductionScore = 0;
-    if (userQrsMatch) conductionScore += 8;
-    if (userPrMatch) conductionScore += 7;
+    if (userQrsMatch) conductionScore += 5;
+    if (userPrMatch) conductionScore += 5;
+    if (userQtcMatch) conductionScore += 5;
 
     const conductionStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
       conductionScore >= 14 ? 'MATCH' : conductionScore >= 7 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-    // 5. ST-T Morphology Evaluation (Max 20 pts)
+    // 6. Chamber Enlargement & Hypertrophy Evaluation (Max 10 pts: Atrial 5, Ventricular 5)
+    const isLvhCase = currentCase.id === 'case_lvh_strain' ||
+      currentCase.pathologyGroup === 'HYPERTROPHY' ||
+      currentCase.title.toLowerCase().includes('hypertrophy') ||
+      currentCase.title.toLowerCase().includes('hipertropi');
+
+    const isRvhCase = currentCase.id === 'case_pulmonary_embolism' ||
+      currentCase.id === 'case_pulm_emb' ||
+      currentCase.title.toLowerCase().includes('pulmonary embolism') ||
+      currentCase.title.toLowerCase().includes('emboli paru');
+
+    let gtVentricular = 'NORMAL';
+    if (isLvhCase) {
+      gtVentricular = 'LVH_STRAIN';
+    } else if (isRvhCase) {
+      gtVentricular = 'RVH';
+    }
+
+    let gtAtrial = 'NORMAL';
+    if (isRvhCase) {
+      gtAtrial = 'RAE';
+    }
+
+    let hypertrophyScore = 0;
+    const userVentricularMatch = (isLvhCase && (form.ventricularHypertrophy === 'LVH' || form.ventricularHypertrophy === 'LVH_STRAIN')) ||
+      (isRvhCase && form.ventricularHypertrophy === 'RVH') ||
+      (!isLvhCase && !isRvhCase && (form.ventricularHypertrophy === 'NORMAL' || form.ventricularHypertrophy === ''));
+
+    if (userVentricularMatch) hypertrophyScore += 5;
+
+    const userAtrialMatch = (isRvhCase && form.atrialEnlargement === 'RAE') ||
+      (!isRvhCase && (form.atrialEnlargement === 'NORMAL' || form.atrialEnlargement === ''));
+
+    if (userAtrialMatch) hypertrophyScore += 5;
+
+    const hypertrophyStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
+      hypertrophyScore >= 10 ? 'MATCH' : hypertrophyScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+
+    // 7. ST-T Morphology Evaluation (Max 15 pts)
     const hasGtSte = metrics.stElevationLeads.length > 0;
     const hasGtStd = metrics.stDepressionLeads.length > 0;
     const hasGtTInv = metrics.tWaveInversionLeads.length > 0;
@@ -206,36 +284,36 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
 
     let stScore = 0;
     if (!hasAnyPathology && (form.stTFindings.length === 0 || form.stTFindings.includes('NORMAL_ST'))) {
-      stScore = 20;
+      stScore = 15;
     } else {
-      if (hasGtSte && form.stTFindings.includes('ST_ELEVASI')) stScore += 8;
-      else if (!hasGtSte && !form.stTFindings.includes('ST_ELEVASI')) stScore += 4;
+      if (hasGtSte && form.stTFindings.includes('ST_ELEVASI')) stScore += 6;
+      else if (!hasGtSte && !form.stTFindings.includes('ST_ELEVASI')) stScore += 3;
 
-      if (hasGtStd && form.stTFindings.includes('ST_DEPRESI')) stScore += 4;
-      else if (!hasGtStd && !form.stTFindings.includes('ST_DEPRESI')) stScore += 2;
+      if (hasGtStd && form.stTFindings.includes('ST_DEPRESI')) stScore += 3;
+      else if (!hasGtStd && !form.stTFindings.includes('ST_DEPRESI')) stScore += 1;
 
-      if (hasGtTInv && form.stTFindings.includes('INVERSI_T')) stScore += 4;
-      else if (!hasGtTInv && !form.stTFindings.includes('INVERSI_T')) stScore += 2;
+      if (hasGtTInv && form.stTFindings.includes('INVERSI_T')) stScore += 3;
+      else if (!hasGtTInv && !form.stTFindings.includes('INVERSI_T')) stScore += 1;
 
-      if (hasGtQ && form.stTFindings.includes('Q_PATOLOGIS')) stScore += 4;
-      else if (!hasGtQ && !form.stTFindings.includes('Q_PATOLOGIS')) stScore += 2;
+      if (hasGtQ && form.stTFindings.includes('Q_PATOLOGIS')) stScore += 3;
+      else if (!hasGtQ && !form.stTFindings.includes('Q_PATOLOGIS')) stScore += 1;
 
       // Check leads text overlap if ischemic
       const userLeadsLower = form.affectedLeads.toLowerCase().replace(/\s+/g, '');
       let leadBonus = 0;
       if (hasGtSte) {
         const anyLeadFound = metrics.stElevationLeads.some((ld) => userLeadsLower.includes(ld.toLowerCase()));
-        if (anyLeadFound) leadBonus = 4;
+        if (anyLeadFound) leadBonus = 3;
       }
-      stScore = Math.min(20, stScore + leadBonus);
+      stScore = Math.min(15, stScore + leadBonus);
     }
 
     const stStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
-      stScore >= 16 ? 'MATCH' : stScore >= 9 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+      stScore >= 12 ? 'MATCH' : stScore >= 7 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-    // 6. Final Diagnosis & Triage Evaluation (Max 20 pts)
+    // 8. Final Diagnosis & Triage Evaluation (Max 10 pts: Triage 4, Diagnosis 6)
     const triageMatch = form.triageCategory === currentCase.category;
-    let diagScore = triageMatch ? 8 : 0;
+    let diagScore = triageMatch ? 4 : 0;
 
     // Semantic keywords matching against currentCase titles (bilingual)
     const combinedTitles = `${currentCase.title} ${currentCase.titleEn || ''} ${currentCase.medicalTermEn || ''}`.toLowerCase();
@@ -252,16 +330,18 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
     const matchedCount = titleWords.filter((w) => userDiagLower.includes(w)).length;
     if (titleWords.length > 0) {
       const matchRatio = matchedCount / Math.max(3, titleWords.length * 0.4);
-      if (matchRatio >= 0.5) diagScore += 12;
-      else if (matchRatio >= 0.25 || userDiagLower.length > 8) diagScore += 6;
+      if (matchRatio >= 0.5) diagScore += 6;
+      else if (matchRatio >= 0.25 || userDiagLower.length > 8) diagScore += 4;
       else if (userDiagLower.length > 3) diagScore += 2;
     }
 
     const diagStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
-      diagScore >= 17 ? 'MATCH' : diagScore >= 8 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+      diagScore >= 8 ? 'MATCH' : diagScore >= 4 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
     // Total Composite Score (0 - 100)
-    const totalScore = Math.round(rateScore + rhythmScore + axisScore + conductionScore + stScore + diagScore);
+    const totalScore = Math.round(
+      calibScore + rateScore + rhythmScore + axisScore + conductionScore + hypertrophyScore + stScore + diagScore
+    );
 
     // Competency Level
     let competencyLevel = t.practice.criticalTitle;
@@ -305,6 +385,11 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
     }
 
     return {
+      calibScore,
+      calibStatus,
+      gtPaperSpeed,
+      gtVoltage,
+      gtAvr,
       rateScore,
       rateDelta,
       rateStatus,
@@ -315,6 +400,12 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
       axisStatus,
       conductionScore,
       conductionStatus,
+      gtQtcProlonged,
+      gtQtcShort,
+      hypertrophyScore,
+      hypertrophyStatus,
+      gtVentricular,
+      gtAtrial,
       stScore,
       stStatus,
       diagScore,
@@ -443,14 +534,101 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
       {/* 4. Main Scrollable Stage Area: Form vs Discrepancy Matrix */}
       <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {!isSubmitted ? (
-          /* FORM INTERPRETASI SISTEMATIS 6 TAHAP */
+          /* FORM INTERPRETASI SISTEMATIS 8 TAHAP (GOLD STANDARD) */
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-            {/* TAHAP 1: Frekuensi Jantung (Rate) */}
+            {/* TAHAP 1: Kalibrasi & Standarisasi Kertas (Technical Preflight) */}
+            <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-stone-800 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-blue-600" />
+                  {t.practiceDrill.stage1CalibrationTitle}
+                </span>
+                <span className="text-[10px] text-stone-500 font-mono">25 mm/s | 10 mm/mV</span>
+              </div>
+              <p className="text-[10px] text-stone-500">{t.practiceDrill.stage1CalibrationHint}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {t.practiceDrill.calibrationPaperSpeedLabel}
+                  </label>
+                  <div className="flex gap-1">
+                    {[
+                      { id: '25', label: '25 mm/s' },
+                      { id: '50', label: '50 mm/s' },
+                    ].map((sp) => (
+                      <button
+                        type="button"
+                        key={sp.id}
+                        onClick={() => setForm({ ...form, paperSpeed: sp.id as any })}
+                        className={`flex-1 py-1 text-[10px] font-bold rounded border transition cursor-pointer ${
+                          form.paperSpeed === sp.id
+                            ? 'bg-blue-600 text-white border-blue-700'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {sp.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {t.practiceDrill.calibrationVoltageLabel}
+                  </label>
+                  <div className="flex gap-1">
+                    {[
+                      { id: '10', label: '10 mm/mV' },
+                      { id: '5', label: '5 mm/mV' },
+                      { id: '20', label: '20 mm/mV' },
+                    ].map((vt) => (
+                      <button
+                        type="button"
+                        key={vt.id}
+                        onClick={() => setForm({ ...form, voltageSensitivity: vt.id as any })}
+                        className={`flex-1 py-1 text-[10px] font-bold rounded border transition cursor-pointer ${
+                          form.voltageSensitivity === vt.id
+                            ? 'bg-blue-600 text-white border-blue-700'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {vt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {t.practiceDrill.calibrationAvrLabel}
+                  </label>
+                  <div className="flex gap-1">
+                    {[
+                      { id: 'NEGATIVE', label: locale === 'en' ? 'Inverted (-)' : 'Inversi (-)' },
+                      { id: 'POSITIVE', label: locale === 'en' ? 'Upright (+)' : 'Tegak (+)' },
+                    ].map((av) => (
+                      <button
+                        type="button"
+                        key={av.id}
+                        onClick={() => setForm({ ...form, avrOrientation: av.id as any })}
+                        className={`flex-1 py-1 text-[10px] font-bold rounded border transition cursor-pointer ${
+                          form.avrOrientation === av.id
+                            ? 'bg-blue-600 text-white border-blue-700'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {av.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* TAHAP 2: Frekuensi Jantung (Rate) */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-stone-800 flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5 text-blue-600" />
-                  {t.practice.rateStageTitle}
+                  {t.practiceDrill.stage2RateTitle}
                 </span>
                 <span className="text-[10px] text-stone-500 font-mono">{t.practiceDrill.rateFromPaperHint}</span>
               </div>
@@ -497,11 +675,11 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* TAHAP 2: Irama & Reguleritas (Rhythm) */}
+            {/* TAHAP 3: Irama & Reguleritas (Rhythm) */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-amber-600" />
-                {t.practice.rhythmStageTitle}
+                {t.practiceDrill.stage3RhythmTitle}
               </span>
               <div className="space-y-1.5">
                 <div className="flex gap-1">
@@ -549,11 +727,11 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* TAHAP 3: Aksis Frontal (Axis) */}
+            {/* TAHAP 4: Aksis Frontal (Axis) */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                {t.practice.axisStageTitle}
+                {t.practiceDrill.stage4AxisTitle}
               </span>
               <div className="grid grid-cols-2 gap-1.5">
                 {[
@@ -578,13 +756,13 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* TAHAP 4: Interval & Konduksi (PR & QRS) */}
+            {/* TAHAP 5: Interval Konduksi (PR, QRS, QTc) */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
                 <Activity className="w-3.5 h-3.5 text-emerald-600" />
-                {t.practice.conductionStageTitle}
+                {t.practiceDrill.stage5IntervalsTitle}
               </span>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div>
                   <label className="text-[10px] text-stone-500 block mb-0.5">{t.practiceDrill.prLabel}</label>
                   <select
@@ -621,6 +799,19 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                     ))}
                   </div>
                 </div>
+                <div>
+                  <label className="text-[10px] text-stone-500 block mb-0.5">{t.practiceDrill.qtcLabel}</label>
+                  <select
+                    value={form.qtcStatus}
+                    onChange={(e) => setForm({ ...form, qtcStatus: e.target.value as any })}
+                    className="w-full bg-white border border-stone-300 rounded px-1.5 py-1 text-base sm:text-[11px] text-stone-800 focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="">{t.practiceDrill.qtcPlaceholder}</option>
+                    <option value="NORMAL">{t.practiceDrill.qtcNormal}</option>
+                    <option value="PROLONGED">{t.practiceDrill.qtcProlonged}</option>
+                    <option value="SHORTENED">{t.practiceDrill.qtcShortened}</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <input
@@ -633,11 +824,73 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* TAHAP 5: Morfologi ST-T & Iskemia */}
+            {/* TAHAP 6: Pembesaran Ruang & Hipertropi (Chamber Enlargement) */}
+            <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
+              <span className="font-bold text-stone-800 flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5 text-teal-600" />
+                {t.practiceDrill.stage6HypertrophyTitle}
+              </span>
+              <p className="text-[10px] text-stone-500">{t.practiceDrill.stage6HypertrophyHint}</p>
+              <div className="space-y-2">
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-1 font-semibold">
+                    {t.practiceDrill.atrialEnlargementLabel}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
+                    {[
+                      { id: 'NORMAL', label: t.practiceDrill.atrialNormal },
+                      { id: 'RAE', label: t.practiceDrill.atrialRae },
+                      { id: 'LAE', label: t.practiceDrill.atrialLae },
+                    ].map((at) => (
+                      <button
+                        type="button"
+                        key={at.id}
+                        onClick={() => setForm({ ...form, atrialEnlargement: at.id as any })}
+                        className={`p-1.5 text-[10px] text-left font-bold rounded border transition cursor-pointer ${
+                          form.atrialEnlargement === at.id
+                            ? 'bg-teal-600 text-white border-teal-700'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {at.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-1 font-semibold">
+                    {t.practiceDrill.ventricularHypertrophyLabel}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                    {[
+                      { id: 'NORMAL', label: t.practiceDrill.ventricularNormal },
+                      { id: 'LVH', label: t.practiceDrill.ventricularLvh },
+                      { id: 'LVH_STRAIN', label: t.practiceDrill.ventricularLvhStrain },
+                      { id: 'RVH', label: t.practiceDrill.ventricularRvh },
+                    ].map((vt) => (
+                      <button
+                        type="button"
+                        key={vt.id}
+                        onClick={() => setForm({ ...form, ventricularHypertrophy: vt.id as any })}
+                        className={`p-1.5 text-[10px] text-left font-bold rounded border transition cursor-pointer ${
+                          form.ventricularHypertrophy === vt.id
+                            ? 'bg-teal-700 text-white border-teal-800'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {vt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* TAHAP 7: Morfologi ST-T & Iskemia */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                {t.practice.stStageTitle}
+                {t.practiceDrill.stage7StTitle}
               </span>
               <div className="flex flex-wrap gap-1">
                 {[
@@ -676,11 +929,11 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* TAHAP 6: Kesimpulan & Diagnosis Utama */}
+            {/* TAHAP 8: Kesimpulan & Diagnosis Utama */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
                 <Award className="w-3.5 h-3.5 text-indigo-600" />
-                {t.practice.diagnosisStageTitle}
+                {t.practiceDrill.stage8SynthesisTitle}
               </span>
 
               {/* 2-Second Global Triage */}
@@ -799,7 +1052,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             )}
 
-            {/* 3. The 6-Stage Side-by-Side Discrepancy Matrix Table */}
+            {/* 3. The 8-Stage Side-by-Side Discrepancy Matrix Table */}
             <div className="border border-stone-200 rounded-lg overflow-hidden shadow-2xs">
               <div className="bg-stone-100 px-3 py-1.5 font-bold text-[11px] text-stone-700 flex justify-between items-center border-b border-stone-200">
                 <span>{t.practiceDrill.tableStageHeader}</span>
@@ -807,10 +1060,44 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
 
               <div className="divide-y divide-stone-200 text-[11px]">
-                {/* Row 1: Rate */}
+                {/* Row 1: Technical Preflight & Calibration */}
                 <div className="p-2.5 bg-white space-y-1">
                   <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>1. {t.practice.rateStageTitle}</span>
+                    <span>1. {t.practiceDrill.stage1CalibrationTitle}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                        evaluation.calibStatus === 'MATCH'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : evaluation.calibStatus === 'MILD_DISCREPANCY'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {evaluation.calibStatus === 'MATCH'
+                        ? t.practiceDrill.matchStatus
+                        : evaluation.calibStatus === 'MILD_DISCREPANCY'
+                        ? t.practiceDrill.mildStatus
+                        : t.practiceDrill.severeStatus}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
+                      <strong className="text-stone-900">{form.paperSpeed || '25'} mm/s | {form.voltageSensitivity || '10'} mm/mV</strong>{' '}
+                      <span className="text-stone-500">(aVR: {form.avrOrientation || 'NEGATIVE'})</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
+                      <strong className="text-blue-900">{evaluation.gtPaperSpeed} mm/s | {evaluation.gtVoltage} mm/mV</strong>{' '}
+                      <span className="text-stone-500">(aVR: {evaluation.gtAvr})</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 2: Rate */}
+                <div className="p-2.5 bg-white space-y-1">
+                  <div className="flex items-center justify-between font-bold text-stone-800">
+                    <span>2. {t.practiceDrill.stage2RateTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                         evaluation.rateStatus === 'MATCH'
@@ -841,10 +1128,10 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   </div>
                 </div>
 
-                {/* Row 2: Rhythm */}
+                {/* Row 3: Rhythm */}
                 <div className="p-2.5 bg-white space-y-1">
                   <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>2. {t.practice.rhythmStageTitle}</span>
+                    <span>3. {t.practiceDrill.stage3RhythmTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                         evaluation.rhythmStatus === 'MATCH'
@@ -877,10 +1164,10 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   </div>
                 </div>
 
-                {/* Row 3: Axis */}
+                {/* Row 4: Axis */}
                 <div className="p-2.5 bg-white space-y-1">
                   <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>3. {t.practice.axisStageTitle}</span>
+                    <span>4. {t.practiceDrill.stage4AxisTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                         evaluation.axisStatus === 'MATCH'
@@ -905,10 +1192,10 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   </div>
                 </div>
 
-                {/* Row 4: Intervals & Conduction */}
+                {/* Row 5: Intervals & Conduction */}
                 <div className="p-2.5 bg-white space-y-1">
                   <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>4. {t.practice.conductionStageTitle}</span>
+                    <span>5. {t.practiceDrill.stage5IntervalsTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                         evaluation.conductionStatus === 'MATCH'
@@ -928,22 +1215,56 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   <div className="grid grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
-                      <span>PR: {form.prStatus || '-'}</span> | <span>QRS: {form.qrsStatus || '-'}</span>
+                      <span>PR: {form.prStatus || '-'}</span> | <span>QRS: {form.qrsStatus || '-'}</span> | <span>QTc: {form.qtcStatus || '-'}</span>
                       {form.conductionDefect && <div className="text-stone-800 italic">{form.conductionDefect}</div>}
                     </div>
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
                       <span className="text-blue-900 font-semibold">
-                        PR: {currentCase.metrics.prIntervalMs} ms | QRS: {currentCase.metrics.qrsDurationMs} ms
+                        PR: {currentCase.metrics.prIntervalMs} ms | QRS: {currentCase.metrics.qrsDurationMs} ms | QTc: {currentCase.metrics.qtcIntervalMs} ms
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Row 5: ST-T Morphology */}
+                {/* Row 6: Chamber Enlargement & Hypertrophy */}
                 <div className="p-2.5 bg-white space-y-1">
                   <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>5. {t.practice.stStageTitle}</span>
+                    <span>6. {t.practiceDrill.stage6HypertrophyTitle}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                        evaluation.hypertrophyStatus === 'MATCH'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : evaluation.hypertrophyStatus === 'MILD_DISCREPANCY'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {evaluation.hypertrophyStatus === 'MATCH'
+                        ? t.practiceDrill.matchStatus
+                        : evaluation.hypertrophyStatus === 'MILD_DISCREPANCY'
+                        ? t.practiceDrill.partialStatus
+                        : t.practiceDrill.severeStatus}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
+                      <span>Atrium: {form.atrialEnlargement || 'NORMAL'}</span> | <span>Ventrikel: {form.ventricularHypertrophy || 'NORMAL'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
+                      <span className="text-blue-900 font-semibold">
+                        Atrium: {evaluation.gtAtrial} | Ventrikel: {evaluation.gtVentricular}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 7: ST-T Morphology & Ischemia */}
+                <div className="p-2.5 bg-white space-y-1">
+                  <div className="flex items-center justify-between font-bold text-stone-800">
+                    <span>7. {t.practiceDrill.stage7StTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                         evaluation.stStatus === 'MATCH'
@@ -991,10 +1312,10 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   </div>
                 </div>
 
-                {/* Row 6: Final Clinical Diagnosis */}
+                {/* Row 8: Final Clinical Diagnosis */}
                 <div className="p-2.5 bg-purple-50/40 space-y-1">
                   <div className="flex items-center justify-between font-bold text-purple-950">
-                    <span>6. {t.practice.diagnosisStageTitle}</span>
+                    <span>8. {t.practiceDrill.stage8SynthesisTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                         evaluation.diagStatus === 'MATCH'
@@ -1035,6 +1356,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                 type="button"
                 onClick={() => {
                   const mappedAnswers: Record<string, string> = {
+                    calibration: `${form.paperSpeed || '25'} mm/s, ${form.voltageSensitivity || '10'} mm/mV, aVR ${form.avrOrientation || 'NEGATIVE'}`,
                     heartRate: form.heartRateBpm,
                     rateCategory: form.rateCategory,
                     regularity: form.regularity,
@@ -1042,6 +1364,9 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                     axisClassification: form.axisClassification,
                     prIntervalStatus: form.prStatus,
                     qrsWidth: form.qrsStatus,
+                    qtcStatus: form.qtcStatus,
+                    hypertrophyAtrial: form.atrialEnlargement,
+                    hypertrophyVentricular: form.ventricularHypertrophy,
                     stMorphology: form.stTFindings.join(', '),
                     ischemiaLeads: form.affectedLeads,
                     clinicalDiagnosis: `[${form.triageCategory}] ${form.clinicalDiagnosis}`,

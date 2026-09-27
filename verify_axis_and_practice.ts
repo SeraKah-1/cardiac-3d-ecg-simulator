@@ -102,6 +102,39 @@ if (afibCase) {
   assert(afibCase.metrics.isRegular === false, 'AFib case is authentically marked irregular');
 }
 
+console.log('=== TEST SUITE 4: 8-STAGE PRACTICE DRILL SYSTEMATIC METRICS & CALIBRATION ===');
+
+// 1. Verify technical calibration on all 20 practice cases
+practiceCases.forEach((c, idx) => {
+  assert(c.calibration.paperSpeedMmPerSec === 25, `Case ${idx + 1} has standard 25 mm/s paper speed`);
+  assert(c.calibration.voltageMmPerMv === 10, `Case ${idx + 1} has standard 10 mm/mV voltage sensitivity`);
+  assert(c.metrics.qtcIntervalMs >= 300 && c.metrics.qtcIntervalMs <= 650, `Case ${idx + 1} has physiological QTc (${c.metrics.qtcIntervalMs} ms)`);
+});
+
+// 2. Verify Chamber Enlargement & Hypertrophy cases
+const lvhCase = THALER_EKG_CASES.find((c) => c.id === 'case_lvh_strain');
+assert(Boolean(lvhCase), 'Case 4 LVH with strain exists in case bank');
+if (lvhCase) {
+  assert(lvhCase.pathologyGroup === 'HYPERTROPHY', 'LVH case is grouped under HYPERTROPHY');
+  assert(lvhCase.metrics.stDepressionLeads.includes('V5') && lvhCase.metrics.stDepressionLeads.includes('V6'), 'LVH has lateral ST depression');
+  assert(lvhCase.metrics.tWaveInversionLeads.includes('V5') && lvhCase.metrics.tWaveInversionLeads.includes('V6'), 'LVH has lateral T inversion');
+}
+
+// 3. Verify Prolonged QTc pathology case
+const longQtcCase = THALER_EKG_CASES.find((c) => c.metrics.qtcIntervalMs > 460);
+assert(Boolean(longQtcCase), 'At least one prolonged QTc case exists in bank (e.g. Hypokalemia)');
+if (longQtcCase) {
+  assert(longQtcCase.metrics.qtcIntervalMs > 460, `Prolonged QTc case confirmed (${longQtcCase.metrics.qtcIntervalMs} ms)`);
+}
+
+// 4. Verify Pulmonary Embolism with RV strain / overload
+const peCase = THALER_EKG_CASES.find((c) => c.id === 'case_pulmonary_embolism');
+assert(Boolean(peCase), 'Case 18 Pulmonary Embolism exists in case bank');
+if (peCase) {
+  assert(peCase.category === 'PATHOLOGIC', 'PE case is marked PATHOLOGIC');
+  assert(peCase.metrics.tWaveInversionLeads.length > 0, 'PE case has anterior/inferior T wave inversion');
+}
+
 console.log(`\n========================================`);
 console.log(`TOTAL PASS: ${passCount}`);
 console.log(`TOTAL FAIL: ${failCount}`);
