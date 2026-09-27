@@ -172,6 +172,13 @@ export interface LeadWaveformPoint {
 
 export type LeadMap = Record<string, number[]>; // Array of microvolt/millivolt samples at 250Hz or 500Hz
 
+export type PWaveMorphology = 'NORMAL_SINUS' | 'ECTOPIC_ATRIAL' | 'RETROGRADE' | 'ABSENT_FIBRILLATORY' | 'FLUTTER' | 'DISSOCIATED';
+export type AtrialEnlargement = 'NORMAL' | 'RAE' | 'LAE' | 'BIATRIAL';
+export type VentricularHypertrophy = 'NORMAL' | 'LVH' | 'LVH_STRAIN' | 'RVH';
+export type BundleBranchBlock = 'NONE' | 'RBBB' | 'LBBB' | 'WPW_PREEXCITATION';
+export type RWaveProgression = 'NORMAL' | 'POOR_R_PROGRESSION' | 'EARLY_TRANSITION' | 'REVERSED';
+export type UWaveStatus = 'NORMAL' | 'PROMINENT' | 'INVERTED';
+
 export interface EKGCase {
   id: string;
   caseCode: string;
@@ -202,6 +209,12 @@ export interface EKGCase {
     stDepressionLeads: string[];
     tWaveInversionLeads: string[];
     pathologicQWaveLeads: string[];
+    pWaveMorphology?: PWaveMorphology;
+    atrialEnlargement?: AtrialEnlargement;
+    ventricularHypertrophy?: VentricularHypertrophy;
+    bundleBranchBlock?: BundleBranchBlock;
+    rWaveProgression?: RWaveProgression;
+    uWaveStatus?: UWaveStatus;
   };
   tutorialSteps: TutorialStep[];
   // Precomputed or synthesized lead waveform data:

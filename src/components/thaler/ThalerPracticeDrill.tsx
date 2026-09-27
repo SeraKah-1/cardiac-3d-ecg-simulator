@@ -1,10 +1,16 @@
 /**
- * ThalerPracticeDrill: High-Yield Systematic Clinical Practice Mode
- * Enforces Dr. Malcolm S. Thaler's 6-stage clinical interpretation sequence:
- * 1. Frekuensi (Rate), 2. Irama (Rhythm), 3. Aksis (Axis), 4. Interval/Konduksi,
- * 5. Morfologi ST-T & Iskemia, 6. Kesimpulan & Diagnosis Klinis Akhir.
- * Features strict case title blinding (anonymized clinical vignettes),
- * free-form clinical input, and an automated Discrepancy & Comparison Matrix ("Seberapa Ngawur").
+ * ThalerPracticeDrill: High-Yield Systematic 10-Step Clinical Practice Mode
+ * Enforces the Gold-Standard 12-Lead EKG Interpretation Sequence:
+ * 1. Technical Preflight & Calibration (Speed, Voltage, aVR)
+ * 2. Heart Rate Determination (bpm, brady/normal/tachy)
+ * 3. Cardiac Rhythm & Regularity (Sinus, Atrial, Junctional, Ventricular, Blocks)
+ * 4. Frontal Electrical Axis & Lead II Confirmation
+ * 5. P-Wave Morphology & Atrial Enlargement (RAE, LAE, f-waves, flutter, dissociation)
+ * 6. Conduction Intervals & AV Blocks (PR interval, Sex-specific QTc)
+ * 7. QRS Complex Duration & Bundle Branch Blocks (Narrow, Wide, RBBB, LBBB, WPW)
+ * 8. Precordial R-Wave Progression & Pathological Q Waves (V1-V6, PRWP, Necrosis)
+ * 9. ST-Segment, T-Wave & U-Wave Repolarization (STEMI, Ischemia, Hyperkalemia, Hypokalemia)
+ * 10. Anatomical Vascular Territories, Triage & Definitive Diagnosis
  * Strictly zero em-dashes (Unicode U+2014 banned).
  */
 
@@ -39,37 +45,49 @@ interface ThalerPracticeDrillProps {
 }
 
 interface FormState {
-  // Stage 1: Kalibrasi & Standarisasi (Technical Preflight)
+  // Step 1: Kalibrasi & Standarisasi (Technical Preflight)
   paperSpeed: '25' | '50' | '';
   voltageSensitivity: '10' | '5' | '20' | '';
   avrOrientation: 'NEGATIVE' | 'POSITIVE' | '';
 
-  // Stage 2: Frekuensi (Rate)
+  // Step 2: Frekuensi Denyut Jantung (Heart Rate)
   heartRateBpm: string;
   rateCategory: 'BRADYCARDIA' | 'NORMAL' | 'TACHYCARDIA' | '';
 
-  // Stage 3: Irama & Reguleritas (Rhythm)
+  // Step 3: Irama & Reguleritas (Rhythm)
   regularity: 'REGULAR' | 'IRREGULAR' | 'IRREGULARLY_IRREGULAR' | '';
   rhythmOrigin: string;
 
-  // Stage 4: Aksis Frontal (Axis)
+  // Step 4: Aksis Bidang Frontal (Frontal Electrical Axis)
   axisClassification: 'NORMAL' | 'LAD' | 'RAD' | 'EXTREME' | '';
+  leadIIPolarity: 'POSITIVE' | 'NEGATIVE' | '';
 
-  // Stage 5: Interval & Konduksi (PR, QRS, QTc)
+  // Step 5: Analisis Gelombang P & Pembesaran Atrium (P Wave & Atrium)
+  pWaveMorphology: 'NORMAL_SINUS' | 'ECTOPIC_ATRIAL' | 'RETROGRADE' | 'ABSENT_FIBRILLATORY' | 'FLUTTER' | 'DISSOCIATED' | '';
+  atrialEnlargement: 'NORMAL' | 'RAE' | 'LAE' | 'BIATRIAL' | '';
+
+  // Step 6: Interval Konduksi & Blok AV (PR, QTc)
   prStatus: 'NORMAL' | 'PROLONGED' | 'SHORTENED' | 'ABSENT' | '';
-  qrsStatus: 'NARROW' | 'WIDE' | '';
   qtcStatus: 'NORMAL' | 'PROLONGED' | 'SHORTENED' | '';
+
+  // Step 7: Kompleks QRS & Blok Berkas (QRS Duration & BBB)
+  qrsStatus: 'NARROW' | 'WIDE' | '';
+  bundleBranchBlock: 'NONE' | 'RBBB' | 'LBBB' | 'WPW_PREEXCITATION' | '';
   conductionDefect: string;
 
-  // Stage 6: Pembesaran Ruang & Hipertropi (Chamber Enlargement & Hypertrophy)
-  atrialEnlargement: 'NORMAL' | 'RAE' | 'LAE' | '';
-  ventricularHypertrophy: 'NORMAL' | 'LVH' | 'LVH_STRAIN' | 'RVH' | '';
+  // Step 8: Progresi Gelombang R Prekordial & Gelombang Q Patologis
+  rWaveProgression: 'NORMAL' | 'POOR_R_PROGRESSION' | 'EARLY_TRANSITION' | 'REVERSED' | '';
+  hasPathologicQ: 'NO' | 'YES' | '';
 
-  // Stage 7: Morfologi Iskemia & Infark (ST-T)
+  // Step 9: Segmen ST, Gelombang T & Gelombang U (Repolarisasi)
+  stDeviation: 'ISOELECTRIC' | 'ELEVATION' | 'DEPRESSION' | 'BOTH' | '';
+  tWaveMorphology: 'NORMAL' | 'INVERTED' | 'PEAKED_TENTED' | 'FLAT' | '';
+  uWaveStatus: 'NORMAL' | 'PROMINENT' | 'INVERTED' | '';
   stTFindings: string[];
   affectedLeads: string;
 
-  // Stage 8: Kesimpulan & Diagnosis Utama (Synthesis & Triage)
+  // Step 10: Teritori Vaskular Anatomi & Sintesis Triase Klinis
+  vascularTerritory: 'NONE' | 'INFERIOR' | 'ANTEROSEPTAL' | 'LATERAL' | 'POSTERIOR' | 'DIFFUSE' | '';
   triageCategory: TriageCategory | '';
   clinicalDiagnosis: string;
   confidenceLevel: 50 | 75 | 100;
@@ -84,14 +102,22 @@ const INITIAL_FORM: FormState = {
   regularity: '',
   rhythmOrigin: '',
   axisClassification: '',
+  leadIIPolarity: '',
+  pWaveMorphology: '',
+  atrialEnlargement: '',
   prStatus: '',
-  qrsStatus: '',
   qtcStatus: '',
+  qrsStatus: '',
+  bundleBranchBlock: '',
   conductionDefect: '',
-  atrialEnlargement: 'NORMAL',
-  ventricularHypertrophy: 'NORMAL',
+  rWaveProgression: '',
+  hasPathologicQ: '',
+  stDeviation: '',
+  tWaveMorphology: '',
+  uWaveStatus: '',
   stTFindings: [],
   affectedLeads: '',
+  vascularTerritory: '',
   triageCategory: '',
   clinicalDiagnosis: '',
   confidenceLevel: 75,
@@ -135,58 +161,74 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
     });
   };
 
-  // Systematic 8-Stage Discrepancy & Accuracy Evaluation Engine
+  // Helper to infer ground-truth primary territory
+  const gtTerritory = useMemo<'NONE' | 'INFERIOR' | 'ANTEROSEPTAL' | 'LATERAL' | 'POSTERIOR' | 'DIFFUSE'>(() => {
+    const id = currentCase.id;
+    if (id === 'case_inferior_stemi') return 'INFERIOR';
+    if (id === 'case_anterior_stemi') return 'ANTEROSEPTAL';
+    if (id === 'case_posterior_stemi') return 'POSTERIOR';
+    if (id === 'case_acute_pericarditis' || id === 'case_hyperkalemia' || id === 'case_severe_hypokalemia') return 'DIFFUSE';
+    if (id === 'case_lvh_strain') return 'LATERAL';
+    if (currentCase.metrics.stElevationLeads.some((l) => ['II', 'III', 'aVF'].includes(l))) return 'INFERIOR';
+    if (currentCase.metrics.stElevationLeads.some((l) => ['V1', 'V2', 'V3', 'V4'].includes(l))) return 'ANTEROSEPTAL';
+    if (currentCase.metrics.stElevationLeads.some((l) => ['I', 'aVL', 'V5', 'V6'].includes(l))) return 'LATERAL';
+    return 'NONE';
+  }, [currentCase]);
+
+  // Systematic 10-Step Discrepancy & Accuracy Evaluation Engine
   const evaluation = useMemo(() => {
     const metrics = currentCase.metrics;
 
-    // 1. Technical Preflight & Calibration Evaluation (Max 10 pts)
+    // 1. Technical Preflight & Calibration (Max 10 pts)
     const gtPaperSpeed = currentCase.calibration.paperSpeedMmPerSec === 25 ? '25' : '50';
     const gtVoltage = currentCase.calibration.voltageMmPerMv === 10 ? '10' : currentCase.calibration.voltageMmPerMv === 5 ? '5' : '20';
     const gtAvr = 'NEGATIVE';
 
     let calibScore = 0;
-    const speedVoltMatch = (form.paperSpeed === gtPaperSpeed || form.paperSpeed === '') &&
-      (form.voltageSensitivity === gtVoltage || form.voltageSensitivity === '');
-    if (speedVoltMatch) calibScore += 5;
-
-    const avrMatch = form.avrOrientation === gtAvr || form.avrOrientation === '';
-    if (avrMatch) calibScore += 5;
+    if (form.paperSpeed !== '' && form.paperSpeed === gtPaperSpeed) calibScore += 3;
+    if (form.voltageSensitivity !== '' && form.voltageSensitivity === gtVoltage) calibScore += 3;
+    if (form.avrOrientation !== '' && form.avrOrientation === gtAvr) calibScore += 4;
 
     const calibStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
-      calibScore >= 10 ? 'MATCH' : calibScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+      calibScore >= 10 ? 'MATCH' : calibScore >= 6 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-    // 2. Rate Evaluation (Max 15 pts)
+    // 2. Heart Rate Determination (Max 10 pts)
     const parsedHr = parseInt(form.heartRateBpm, 10);
     const gtHr = metrics.heartRateBpm;
+    const gtRateCat = gtHr < 60 ? 'BRADYCARDIA' : gtHr > 100 ? 'TACHYCARDIA' : 'NORMAL';
     let rateScore = 0;
     let rateDelta = NaN;
     let rateStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' = 'SEVERE_DISCREPANCY';
 
     if (!isNaN(parsedHr) && parsedHr > 0) {
       rateDelta = Math.abs(parsedHr - gtHr);
-      const pctDelta = rateDelta / gtHr;
-      if (pctDelta <= 0.12) {
-        rateScore = 15;
+      if (rateDelta <= 5) {
+        rateScore = 10;
         rateStatus = 'MATCH';
-      } else if (pctDelta <= 0.28) {
-        rateScore = 9;
+      } else if (rateDelta <= 10) {
+        rateScore = 7;
+        rateStatus = 'MILD_DISCREPANCY';
+      } else if (rateDelta <= 20) {
+        rateScore = 4;
+        rateStatus = 'MILD_DISCREPANCY';
+      } else if (form.rateCategory === gtRateCat) {
+        rateScore = 5;
         rateStatus = 'MILD_DISCREPANCY';
       } else {
-        rateScore = 3;
+        rateScore = 1;
         rateStatus = 'SEVERE_DISCREPANCY';
       }
     }
 
-    const gtRateCat = gtHr < 60 ? 'BRADYCARDIA' : gtHr > 100 ? 'TACHYCARDIA' : 'NORMAL';
-
-    // 3. Rhythm Evaluation (Max 15 pts)
+    // 3. Cardiac Rhythm & Regularity (Max 10 pts)
     let rhythmScore = 0;
     const isGtRegular = metrics.isRegular;
     const userRegMatch =
-      (isGtRegular && form.regularity === 'REGULAR') ||
-      (!isGtRegular && (form.regularity === 'IRREGULAR' || form.regularity === 'IRREGULARLY_IRREGULAR'));
+      form.regularity !== '' &&
+      ((isGtRegular && form.regularity === 'REGULAR') ||
+        (!isGtRegular && (form.regularity === 'IRREGULAR' || form.regularity === 'IRREGULARLY_IRREGULAR')));
 
-    if (userRegMatch) rhythmScore += 7;
+    if (userRegMatch) rhythmScore += 5;
 
     const rhythmLower = form.rhythmOrigin.toLowerCase();
     const gtRhythmLower = `${metrics.rhythmDescription} ${metrics.rhythmDescriptionEn || ''}`.toLowerCase();
@@ -198,124 +240,122 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
       (gtRhythmLower.match(/(junctional)/i) && rhythmLower.match(/(junctional)/i)) ||
       (gtRhythmLower.match(/(blok|block)/i) && rhythmLower.match(/(blok|block)/i))
     ) {
-      rhythmScore += 8;
+      rhythmScore += 5;
     }
 
     const rhythmStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
-      rhythmScore >= 13 ? 'MATCH' : rhythmScore >= 7 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+      rhythmScore >= 9 ? 'MATCH' : rhythmScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-    // 4. Axis Evaluation (Max 10 pts)
-    const axisMatch = form.axisClassification === metrics.axisClassification;
+    // 4. Frontal Electrical Axis (Max 10 pts)
+    const axisMatch = form.axisClassification !== '' && form.axisClassification === metrics.axisClassification;
     const axisScore = axisMatch ? 10 : 0;
     const axisStatus: 'MATCH' | 'SEVERE_DISCREPANCY' = axisMatch ? 'MATCH' : 'SEVERE_DISCREPANCY';
 
-    // 5. Interval & Conduction Evaluation (Max 15 pts: QRS 5, PR 5, QTc 5)
-    const gtQrsWide = metrics.qrsDurationMs >= 120;
-    const userQrsMatch = (gtQrsWide && form.qrsStatus === 'WIDE') || (!gtQrsWide && form.qrsStatus === 'NARROW');
+    // 5. P-Wave Morphology & Atrial Enlargement (Max 10 pts: P-wave 5, Atrial 5)
+    const gtPWave = metrics.pWaveMorphology || 'NORMAL_SINUS';
+    const gtAtrial = metrics.atrialEnlargement || 'NORMAL';
+    const userPWaveMatch = form.pWaveMorphology !== '' && form.pWaveMorphology === gtPWave;
+    const userAtrialMatch = form.atrialEnlargement !== '' && form.atrialEnlargement === gtAtrial;
 
+    let pWaveScore = 0;
+    if (userPWaveMatch) pWaveScore += 5;
+    if (userAtrialMatch) pWaveScore += 5;
+
+    const pWaveStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
+      pWaveScore >= 10 ? 'MATCH' : pWaveScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+
+    // 6. Conduction Intervals & AV Blocks (Max 10 pts: PR 5, QTc 5)
     const gtPrAbsent = metrics.prIntervalMs === 0;
     const gtPrProlonged = metrics.prIntervalMs > 200;
     const gtPrShort = metrics.prIntervalMs < 120 && metrics.prIntervalMs > 0;
     const userPrMatch =
-      (gtPrAbsent && form.prStatus === 'ABSENT') ||
-      (gtPrProlonged && form.prStatus === 'PROLONGED') ||
-      (gtPrShort && form.prStatus === 'SHORTENED') ||
-      (!gtPrAbsent && !gtPrProlonged && !gtPrShort && form.prStatus === 'NORMAL');
+      form.prStatus !== '' &&
+      ((gtPrAbsent && form.prStatus === 'ABSENT') ||
+        (gtPrProlonged && form.prStatus === 'PROLONGED') ||
+        (gtPrShort && form.prStatus === 'SHORTENED') ||
+        (!gtPrAbsent && !gtPrProlonged && !gtPrShort && form.prStatus === 'NORMAL'));
 
-    const gtQtcProlonged = metrics.qtcIntervalMs > 460;
+    // Sex-specific QTc Cutoff (Male > 450 ms, Female > 460 ms)
+    const qtcCutoff = currentCase.patient.gender === 'Male' ? 450 : 460;
+    const gtQtcProlonged = metrics.qtcIntervalMs > qtcCutoff;
     const gtQtcShort = metrics.qtcIntervalMs < 350;
     const userQtcMatch =
-      (gtQtcProlonged && form.qtcStatus === 'PROLONGED') ||
-      (gtQtcShort && form.qtcStatus === 'SHORTENED') ||
-      (!gtQtcProlonged && !gtQtcShort && (form.qtcStatus === 'NORMAL' || form.qtcStatus === ''));
+      form.qtcStatus !== '' &&
+      ((gtQtcProlonged && form.qtcStatus === 'PROLONGED') ||
+        (gtQtcShort && form.qtcStatus === 'SHORTENED') ||
+        (!gtQtcProlonged && !gtQtcShort && form.qtcStatus === 'NORMAL'));
 
-    let conductionScore = 0;
-    if (userQrsMatch) conductionScore += 5;
-    if (userPrMatch) conductionScore += 5;
-    if (userQtcMatch) conductionScore += 5;
+    let intervalScore = 0;
+    if (userPrMatch) intervalScore += 5;
+    if (userQtcMatch) intervalScore += 5;
 
-    const conductionStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
-      conductionScore >= 14 ? 'MATCH' : conductionScore >= 7 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+    const intervalStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
+      intervalScore >= 10 ? 'MATCH' : intervalScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-    // 6. Chamber Enlargement & Hypertrophy Evaluation (Max 10 pts: Atrial 5, Ventricular 5)
-    const isLvhCase = currentCase.id === 'case_lvh_strain' ||
-      currentCase.pathologyGroup === 'HYPERTROPHY' ||
-      currentCase.title.toLowerCase().includes('hypertrophy') ||
-      currentCase.title.toLowerCase().includes('hipertropi');
+    // 7. QRS Complex Duration & Bundle Branch Block (Max 10 pts: Width 5, BBB 5)
+    const gtQrsWide = metrics.qrsDurationMs >= 120;
+    const userQrsMatch =
+      form.qrsStatus !== '' &&
+      ((gtQrsWide && form.qrsStatus === 'WIDE') || (!gtQrsWide && form.qrsStatus === 'NARROW'));
 
-    const isRvhCase = currentCase.id === 'case_pulmonary_embolism' ||
-      currentCase.id === 'case_pulm_emb' ||
-      currentCase.title.toLowerCase().includes('pulmonary embolism') ||
-      currentCase.title.toLowerCase().includes('emboli paru');
+    const gtBbb = metrics.bundleBranchBlock || 'NONE';
+    const userBbbMatch = form.bundleBranchBlock !== '' && form.bundleBranchBlock === gtBbb;
 
-    let gtVentricular = 'NORMAL';
-    if (isLvhCase) {
-      gtVentricular = 'LVH_STRAIN';
-    } else if (isRvhCase) {
-      gtVentricular = 'RVH';
-    }
+    let qrsScore = 0;
+    if (userQrsMatch) qrsScore += 5;
+    if (userBbbMatch) qrsScore += 5;
 
-    let gtAtrial = 'NORMAL';
-    if (isRvhCase) {
-      gtAtrial = 'RAE';
-    }
+    const qrsStatusVerdict: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
+      qrsScore >= 10 ? 'MATCH' : qrsScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-    let hypertrophyScore = 0;
-    const userVentricularMatch = (isLvhCase && (form.ventricularHypertrophy === 'LVH' || form.ventricularHypertrophy === 'LVH_STRAIN')) ||
-      (isRvhCase && form.ventricularHypertrophy === 'RVH') ||
-      (!isLvhCase && !isRvhCase && (form.ventricularHypertrophy === 'NORMAL' || form.ventricularHypertrophy === ''));
+    // 8. Precordial R-Wave Progression & Pathological Q Waves (Max 10 pts: R-progression 5, Q-waves 5)
+    const gtProgression = metrics.rWaveProgression || 'NORMAL';
+    const userProgressionMatch = form.rWaveProgression !== '' && form.rWaveProgression === gtProgression;
 
-    if (userVentricularMatch) hypertrophyScore += 5;
+    const gtHasQ = metrics.pathologicQWaveLeads.length > 0;
+    const userQMatch =
+      form.hasPathologicQ !== '' &&
+      ((gtHasQ && form.hasPathologicQ === 'YES') || (!gtHasQ && form.hasPathologicQ === 'NO'));
 
-    const userAtrialMatch = (isRvhCase && form.atrialEnlargement === 'RAE') ||
-      (!isRvhCase && (form.atrialEnlargement === 'NORMAL' || form.atrialEnlargement === ''));
+    let progressionScore = 0;
+    if (userProgressionMatch) progressionScore += 5;
+    if (userQMatch) progressionScore += 5;
 
-    if (userAtrialMatch) hypertrophyScore += 5;
+    const progressionStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
+      progressionScore >= 10 ? 'MATCH' : progressionScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-    const hypertrophyStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
-      hypertrophyScore >= 10 ? 'MATCH' : hypertrophyScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
-
-    // 7. ST-T Morphology Evaluation (Max 15 pts)
+    // 9. ST-Segment, T-Wave & U-Wave Repolarization (Max 10 pts: ST 4, T 3, U 3)
     const hasGtSte = metrics.stElevationLeads.length > 0;
     const hasGtStd = metrics.stDepressionLeads.length > 0;
     const hasGtTInv = metrics.tWaveInversionLeads.length > 0;
-    const hasGtQ = metrics.pathologicQWaveLeads.length > 0;
-    const hasAnyPathology = hasGtSte || hasGtStd || hasGtTInv || hasGtQ;
+    const gtStDev = (hasGtSte && hasGtStd) ? 'BOTH' : hasGtSte ? 'ELEVATION' : hasGtStd ? 'DEPRESSION' : 'ISOELECTRIC';
+    const userStDevMatch = form.stDeviation !== '' && form.stDeviation === gtStDev;
 
-    let stScore = 0;
-    if (!hasAnyPathology && (form.stTFindings.length === 0 || form.stTFindings.includes('NORMAL_ST'))) {
-      stScore = 15;
-    } else {
-      if (hasGtSte && form.stTFindings.includes('ST_ELEVASI')) stScore += 6;
-      else if (!hasGtSte && !form.stTFindings.includes('ST_ELEVASI')) stScore += 3;
+    const gtT = hasGtTInv
+      ? 'INVERTED'
+      : currentCase.id === 'case_hyperkalemia'
+      ? 'PEAKED_TENTED'
+      : currentCase.id === 'case_severe_hypokalemia'
+      ? 'FLAT'
+      : 'NORMAL';
+    const userTMatch = form.tWaveMorphology !== '' && form.tWaveMorphology === gtT;
 
-      if (hasGtStd && form.stTFindings.includes('ST_DEPRESI')) stScore += 3;
-      else if (!hasGtStd && !form.stTFindings.includes('ST_DEPRESI')) stScore += 1;
+    const gtU = metrics.uWaveStatus || 'NORMAL';
+    const userUMatch = form.uWaveStatus !== '' && form.uWaveStatus === gtU;
 
-      if (hasGtTInv && form.stTFindings.includes('INVERSI_T')) stScore += 3;
-      else if (!hasGtTInv && !form.stTFindings.includes('INVERSI_T')) stScore += 1;
+    let stTuScore = 0;
+    if (userStDevMatch) stTuScore += 4;
+    if (userTMatch) stTuScore += 3;
+    if (userUMatch) stTuScore += 3;
 
-      if (hasGtQ && form.stTFindings.includes('Q_PATOLOGIS')) stScore += 3;
-      else if (!hasGtQ && !form.stTFindings.includes('Q_PATOLOGIS')) stScore += 1;
+    const stTuStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
+      stTuScore >= 9 ? 'MATCH' : stTuScore >= 5 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
-      // Check leads text overlap if ischemic
-      const userLeadsLower = form.affectedLeads.toLowerCase().replace(/\s+/g, '');
-      let leadBonus = 0;
-      if (hasGtSte) {
-        const anyLeadFound = metrics.stElevationLeads.some((ld) => userLeadsLower.includes(ld.toLowerCase()));
-        if (anyLeadFound) leadBonus = 3;
-      }
-      stScore = Math.min(15, stScore + leadBonus);
-    }
+    // 10. Vascular Territory & Clinical Synthesis (Max 10 pts: Territory 4, Triage 3, Diagnosis text 3)
+    const userTerritoryMatch = form.vascularTerritory !== '' && form.vascularTerritory === gtTerritory;
+    const triageMatch = form.triageCategory !== '' && form.triageCategory === currentCase.category;
 
-    const stStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
-      stScore >= 12 ? 'MATCH' : stScore >= 7 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
-
-    // 8. Final Diagnosis & Triage Evaluation (Max 10 pts: Triage 4, Diagnosis 6)
-    const triageMatch = form.triageCategory === currentCase.category;
-    let diagScore = triageMatch ? 4 : 0;
-
-    // Semantic keywords matching against currentCase titles (bilingual)
+    // Title keyword matching for diagnosis text
     const combinedTitles = `${currentCase.title} ${currentCase.titleEn || ''} ${currentCase.medicalTermEn || ''}`.toLowerCase();
     const stopWords = new Set([
       'dan', 'atau', 'pada', 'dengan', 'yang', 'akut', 'pola', 'sindrom', 'derajat', 'kasus',
@@ -328,19 +368,32 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
 
     const userDiagLower = form.clinicalDiagnosis.toLowerCase();
     const matchedCount = titleWords.filter((w) => userDiagLower.includes(w)).length;
-    if (titleWords.length > 0) {
+
+    let synthesisScore = 0;
+    if (userTerritoryMatch) synthesisScore += 4;
+    if (triageMatch) synthesisScore += 3;
+    if (titleWords.length > 0 && matchedCount > 0) {
       const matchRatio = matchedCount / Math.max(3, titleWords.length * 0.4);
-      if (matchRatio >= 0.5) diagScore += 6;
-      else if (matchRatio >= 0.25 || userDiagLower.length > 8) diagScore += 4;
-      else if (userDiagLower.length > 3) diagScore += 2;
+      if (matchRatio >= 0.5) synthesisScore += 3;
+      else if (matchRatio >= 0.25 || userDiagLower.length > 6) synthesisScore += 2;
+      else synthesisScore += 1;
     }
 
-    const diagStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
-      diagScore >= 8 ? 'MATCH' : diagScore >= 4 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
+    const synthesisStatus: 'MATCH' | 'MILD_DISCREPANCY' | 'SEVERE_DISCREPANCY' =
+      synthesisScore >= 8 ? 'MATCH' : synthesisScore >= 4 ? 'MILD_DISCREPANCY' : 'SEVERE_DISCREPANCY';
 
     // Total Composite Score (0 - 100)
     const totalScore = Math.round(
-      calibScore + rateScore + rhythmScore + axisScore + conductionScore + hypertrophyScore + stScore + diagScore
+      calibScore +
+        rateScore +
+        rhythmScore +
+        axisScore +
+        pWaveScore +
+        intervalScore +
+        qrsScore +
+        progressionScore +
+        stTuScore +
+        synthesisScore
     );
 
     // Competency Level
@@ -361,35 +414,42 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
       competencyDesc = t.practice.moderateDesc;
     }
 
-    // Critical Clinical Red-Alerts
+    // Critical Red Flags & Safety Alerts
     const criticalAlerts: string[] = [];
-    if (hasGtSte && !form.stTFindings.includes('ST_ELEVASI') && !userDiagLower.includes('stemi')) {
+    if (hasGtSte && form.stDeviation !== 'ELEVATION' && form.stDeviation !== 'BOTH') {
+      criticalAlerts.push(t.practice.missedStemiAlert(metrics.stElevationLeads.join(', ')));
+    }
+    if (currentCase.category === 'PATHOLOGIC' && form.triageCategory === 'NORMAL') {
       criticalAlerts.push(
-        t.practice.missedStemiAlert(metrics.stElevationLeads.join(', '))
+        locale === 'en'
+          ? 'FATAL TRIAGE DISCREPANCY: A life-threatening pathologic ECG was marked as Normal!'
+          : 'DISKREPANSI TRIASE FATAL: EKG patologis yang mengancam jiwa ditandai sebagai Normal!'
       );
     }
-    if (currentCase.category === 'NORMAL' && (form.stTFindings.includes('ST_ELEVASI') || userDiagLower.includes('stemi'))) {
+    if (currentCase.id === 'case_hyperkalemia' && form.tWaveMorphology !== 'PEAKED_TENTED') {
       criticalAlerts.push(
-        t.practice.overdiagnosisAlert
+        locale === 'en'
+          ? 'CRITICAL ALERT: Severe Hyperkalemic peaked tented T-waves missed! Urgent IV Calcium Gluconate required.'
+          : 'PERINGATAN KRITIS: Gelombang T lancip hiperkalemia berat terlewat! Segera berikan IV Kalsium Glukonat.'
       );
     }
-    if (
-      !metrics.isRegular &&
-      (metrics.rhythmDescription.toLowerCase().includes('fibrilasi') ||
-       (metrics.rhythmDescriptionEn && metrics.rhythmDescriptionEn.toLowerCase().includes('fibrillation'))) &&
-      form.regularity === 'REGULAR'
-    ) {
+    if (currentCase.id === 'case_atrial_fibrillation' && form.pWaveMorphology !== 'ABSENT_FIBRILLATORY') {
+      criticalAlerts.push(t.practice.missedAfibAlert);
+    }
+    if (currentCase.id === 'case_severe_hypokalemia' && form.uWaveStatus !== 'PROMINENT') {
       criticalAlerts.push(
-        t.practice.missedAfibAlert
+        locale === 'en'
+          ? 'CRITICAL ALERT: Prominent giant U-waves indicative of severe hypokalemia missed! Extreme risk of Torsades de Pointes.'
+          : 'PERINGATAN KRITIS: Gelombang U raksasa hipokalemia berat terlewat! Risiko ekstrem aritmia fatal Torsades de Pointes.'
       );
     }
 
     return {
-      calibScore,
-      calibStatus,
       gtPaperSpeed,
       gtVoltage,
       gtAvr,
+      calibScore,
+      calibStatus,
       rateScore,
       rateDelta,
       rateStatus,
@@ -398,25 +458,36 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
       rhythmStatus,
       axisScore,
       axisStatus,
-      conductionScore,
-      conductionStatus,
+      pWaveScore,
+      pWaveStatus,
+      gtPWave,
+      gtAtrial,
+      intervalScore,
+      intervalStatus,
       gtQtcProlonged,
       gtQtcShort,
-      hypertrophyScore,
-      hypertrophyStatus,
-      gtVentricular,
-      gtAtrial,
-      stScore,
-      stStatus,
-      diagScore,
-      diagStatus,
+      qrsScore,
+      qrsStatusVerdict,
+      gtBbb,
+      progressionScore,
+      progressionStatus,
+      gtProgression,
+      gtHasQ,
+      stTuScore,
+      stTuStatus,
+      gtStDev,
+      gtT,
+      gtU,
+      synthesisScore,
+      synthesisStatus,
+      gtTerritory,
       totalScore,
       competencyLevel,
       competencyBadge,
       competencyDesc,
       criticalAlerts,
     };
-  }, [form, currentCase, t]);
+  }, [form, currentCase, gtTerritory, t, locale]);
 
   // Form submission handler
   const handleSubmit = (e: React.FormEvent) => {
@@ -458,44 +529,51 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
     onResetZoom();
   };
 
-  // Current case index among practice cases
-  const currentIndex = cases.findIndex((c) => c.id === currentCase.id);
-
   return (
-    <div className="flex flex-col h-full bg-white border-l border-stone-200 text-stone-800 select-none overflow-hidden font-sans">
-      {/* 1. Header: Practice Mode & Score Badge */}
-      <div className="p-3 bg-stone-50 border-b border-stone-200 flex items-center justify-between shrink-0">
+    <div className="flex flex-col h-full bg-stone-100 overflow-hidden font-sans border-l border-stone-200">
+      {/* 1. Header: Blinded Practice Session & Accuracy Counter */}
+      <div className="p-3 bg-white border-b border-stone-200 flex items-center justify-between shrink-0 shadow-2xs">
         <div>
-          <span className="text-[10px] font-mono text-purple-700 font-bold tracking-wider uppercase block">
-            {t.practice.modeTitle}
-          </span>
-          <h2 className="text-xs sm:text-sm font-bold text-stone-900">
-            {t.practice.modeSubtitle}
-          </h2>
+          <div className="flex items-center gap-1.5">
+            <ShieldAlert className="w-4 h-4 text-purple-600" />
+            <span className="font-bold text-sm text-stone-900">{t.practice.modeTitle}</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 border border-purple-200 font-mono font-bold">
+              10-STEP OSCE
+            </span>
+          </div>
+          <p className="text-[11px] text-stone-500 mt-0.5">{t.practice.modeSubtitle}</p>
         </div>
-        <div className="text-right font-mono text-xs">
-          <span className="text-stone-500 text-[10px] block">{t.practice.sessionAccuracy}</span>
-          <span className="text-emerald-700 font-bold">
-            {sessionCount.masterCount} / {sessionCount.total}{' '}
-            {sessionCount.total > 0 && `(${Math.round((sessionCount.masterCount / sessionCount.total) * 100)}%)`}
-          </span>
+
+        {/* Accuracy badge / Mastery tally */}
+        <div className="text-right">
+          <div className="text-[10px] text-stone-500 font-semibold">{t.practice.sessionAccuracy}</div>
+          <div className="font-mono text-xs font-bold text-stone-800">
+            {sessionCount.total > 0
+              ? `${Math.round((sessionCount.masterCount / sessionCount.total) * 100)}% (${sessionCount.masterCount}/${sessionCount.total})`
+              : '0/0'}
+          </div>
         </div>
       </div>
 
-      {/* 2. Blinded Case Selector Dropdown & OSCE Blank Download (Zero Title Leaks) */}
-      <div className="px-3 py-2 bg-stone-100/80 border-b border-stone-200 flex items-center justify-between gap-2 shrink-0">
-        <label className="text-[11px] font-mono text-stone-500 shrink-0 font-bold">{t.practice.selectCaseLabel}</label>
-        <select
-          value={currentCase.id}
-          onChange={(e) => handleCaseChange(e.target.value)}
-          className="flex-1 bg-white border border-stone-300 text-stone-800 text-base sm:text-xs px-2 py-1 rounded font-sans truncate focus:outline-none focus:border-purple-500 shadow-2xs cursor-pointer"
-        >
-          {cases.map((c, i) => (
-            <option key={c.id} value={c.id}>
-              {locale === 'en' ? 'Practice Case' : 'Kasus Latihan'} #{i + 1}: {c.patient.gender === 'Male' ? (locale === 'en' ? 'Male' : 'Pria') : (locale === 'en' ? 'Female' : 'Wanita')}, {c.patient.age} {locale === 'en' ? 'yo' : 'th'}
-            </option>
-          ))}
-        </select>
+      {/* 2. Blinded Case Selector Bar */}
+      <div className="px-3 py-2 bg-stone-50 border-b border-stone-200 flex items-center justify-between gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider shrink-0">
+            {locale === 'en' ? 'Blinded Case:' : 'Kasus Buta:'}
+          </span>
+          <select
+            value={currentCase.id}
+            onChange={(e) => handleCaseChange(e.target.value)}
+            className="text-xs bg-white border border-stone-300 rounded px-2 py-1 font-mono font-bold text-stone-800 focus:outline-none focus:border-purple-500 truncate cursor-pointer"
+          >
+            {cases.map((c, idx) => (
+              <option key={c.id} value={c.id}>
+                {c.caseCode || `CASE-${idx + 1}`} ({locale === 'en' ? 'Blinded Patient' : 'Pasien Anonim'})
+              </option>
+            ))}
+          </select>
+        </div>
+
         <button
           type="button"
           onClick={() => ThalerPdfExportEngine.exportBlankOsceWorksheet(currentCase, locale)}
@@ -507,7 +585,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
         </button>
       </div>
 
-      {/* 3. Blinded Patient Clinical Vignette (Omitting HR so user must calculate it) */}
+      {/* 3. Blinded Patient Clinical Vignette */}
       <div className="px-3 py-2 bg-white border-b border-stone-200 text-xs shrink-0">
         <div className="flex items-center justify-between text-xs text-stone-600 font-mono mb-1">
           <span>
@@ -531,10 +609,10 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
         </p>
       </div>
 
-      {/* 4. Main Scrollable Stage Area: Form vs Discrepancy Matrix */}
+      {/* 4. Main Scrollable Area: Form vs Discrepancy Matrix */}
       <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {!isSubmitted ? (
-          /* FORM INTERPRETASI SISTEMATIS 8 TAHAP (GOLD STANDARD) */
+          /* FORM INTERPRETASI SISTEMATIS 10 TAHAP (GOLD STANDARD) */
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             {/* TAHAP 1: Kalibrasi & Standarisasi Kertas (Technical Preflight) */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
@@ -623,7 +701,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* TAHAP 2: Frekuensi Jantung (Rate) */}
+            {/* TAHAP 2: Frekuensi Denyut Jantung (Heart Rate) */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-stone-800 flex items-center gap-1.5">
@@ -682,6 +760,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                 {t.practiceDrill.stage3RhythmTitle}
               </span>
               <div className="space-y-1.5">
+                <label className="text-[10px] text-stone-500 block mb-0.5">{t.practiceDrill.rhythmRegularityLabel}</label>
                 <div className="flex gap-1">
                   {[
                     { id: 'REGULAR', label: t.practiceDrill.rhythmRegular },
@@ -727,7 +806,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* TAHAP 4: Aksis Frontal (Axis) */}
+            {/* TAHAP 4: Aksis Bidang Frontal (Electrical Axis) */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-purple-600" />
@@ -754,84 +833,67 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   </button>
                 ))}
               </div>
+              <div>
+                <label className="text-[10px] text-stone-500 block mb-0.5 font-semibold">
+                  {t.practiceDrill.leadIIPolarityLabel}
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                  {[
+                    { id: 'POSITIVE', label: t.practiceDrill.leadIIPositive },
+                    { id: 'NEGATIVE', label: t.practiceDrill.leadIINegative },
+                  ].map((pol) => (
+                    <button
+                      type="button"
+                      key={pol.id}
+                      onClick={() => setForm({ ...form, leadIIPolarity: pol.id as any })}
+                      className={`py-1 px-1.5 text-[9.5px] text-left rounded border transition cursor-pointer ${
+                        form.leadIIPolarity === pol.id
+                          ? 'bg-purple-700 text-white border-purple-800 font-bold'
+                          : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                      }`}
+                    >
+                      {pol.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* TAHAP 5: Interval Konduksi (PR, QRS, QTc) */}
+            {/* TAHAP 5: Analisis Gelombang P & Pembesaran Atrium */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-emerald-600" />
-                {t.practiceDrill.stage5IntervalsTitle}
+                <Activity className="w-3.5 h-3.5 text-cyan-600" />
+                {t.practiceDrill.stage5PWaveTitle}
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="space-y-2">
                 <div>
-                  <label className="text-[10px] text-stone-500 block mb-0.5">{t.practiceDrill.prLabel}</label>
-                  <select
-                    value={form.prStatus}
-                    onChange={(e) => setForm({ ...form, prStatus: e.target.value as any })}
-                    className="w-full bg-white border border-stone-300 rounded px-1.5 py-1 text-base sm:text-[11px] text-stone-800 focus:outline-none focus:border-emerald-500"
-                  >
-                    <option value="">{t.practiceDrill.prPlaceholder}</option>
-                    <option value="NORMAL">{t.practiceDrill.prNormal}</option>
-                    <option value="PROLONGED">{t.practiceDrill.prProlonged}</option>
-                    <option value="SHORTENED">{t.practiceDrill.prShortened}</option>
-                    <option value="ABSENT">{t.practiceDrill.prAbsent}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[10px] text-stone-500 block mb-0.5">{t.practiceDrill.qrsLabel}</label>
-                  <div className="flex gap-1">
+                  <label className="text-[10px] text-stone-600 block mb-1 font-semibold">
+                    {t.practiceDrill.pWaveMorphologyLabel}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                     {[
-                      { id: 'NARROW', label: t.practiceDrill.qrsNarrow },
-                      { id: 'WIDE', label: t.practiceDrill.qrsWide },
-                    ].map((w) => (
+                      { id: 'NORMAL_SINUS', label: t.practiceDrill.pWaveNormalSinus },
+                      { id: 'ECTOPIC_ATRIAL', label: t.practiceDrill.pWaveEctopicAtrial },
+                      { id: 'RETROGRADE', label: t.practiceDrill.pWaveRetrograde },
+                      { id: 'ABSENT_FIBRILLATORY', label: t.practiceDrill.pWaveAbsentFib },
+                      { id: 'FLUTTER', label: t.practiceDrill.pWaveFlutter },
+                      { id: 'DISSOCIATED', label: t.practiceDrill.pWaveDissociated },
+                    ].map((pw) => (
                       <button
                         type="button"
-                        key={w.id}
-                        onClick={() => setForm({ ...form, qrsStatus: w.id as any })}
-                        className={`flex-1 py-1 text-[10px] font-bold rounded border transition cursor-pointer ${
-                          form.qrsStatus === w.id
-                            ? 'bg-emerald-600 text-white border-emerald-700'
+                        key={pw.id}
+                        onClick={() => setForm({ ...form, pWaveMorphology: pw.id as any })}
+                        className={`p-1.5 text-[9.5px] text-left rounded border transition cursor-pointer ${
+                          form.pWaveMorphology === pw.id
+                            ? 'bg-cyan-700 text-white border-cyan-800 font-bold'
                             : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
                         }`}
                       >
-                        {w.label}
+                        {pw.label}
                       </button>
                     ))}
                   </div>
                 </div>
-                <div>
-                  <label className="text-[10px] text-stone-500 block mb-0.5">{t.practiceDrill.qtcLabel}</label>
-                  <select
-                    value={form.qtcStatus}
-                    onChange={(e) => setForm({ ...form, qtcStatus: e.target.value as any })}
-                    className="w-full bg-white border border-stone-300 rounded px-1.5 py-1 text-base sm:text-[11px] text-stone-800 focus:outline-none focus:border-emerald-500"
-                  >
-                    <option value="">{t.practiceDrill.qtcPlaceholder}</option>
-                    <option value="NORMAL">{t.practiceDrill.qtcNormal}</option>
-                    <option value="PROLONGED">{t.practiceDrill.qtcProlonged}</option>
-                    <option value="SHORTENED">{t.practiceDrill.qtcShortened}</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder={t.practiceDrill.conductionDefectPlaceholder}
-                  value={form.conductionDefect}
-                  onChange={(e) => setForm({ ...form, conductionDefect: e.target.value })}
-                  className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-            </div>
-
-            {/* TAHAP 6: Pembesaran Ruang & Hipertropi (Chamber Enlargement) */}
-            <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
-              <span className="font-bold text-stone-800 flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-teal-600" />
-                {t.practiceDrill.stage6HypertrophyTitle}
-              </span>
-              <p className="text-[10px] text-stone-500">{t.practiceDrill.stage6HypertrophyHint}</p>
-              <div className="space-y-2">
                 <div>
                   <label className="text-[10px] text-stone-600 block mb-1 font-semibold">
                     {t.practiceDrill.atrialEnlargementLabel}
@@ -848,7 +910,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                         onClick={() => setForm({ ...form, atrialEnlargement: at.id as any })}
                         className={`p-1.5 text-[10px] text-left font-bold rounded border transition cursor-pointer ${
                           form.atrialEnlargement === at.id
-                            ? 'bg-teal-600 text-white border-teal-700'
+                            ? 'bg-cyan-600 text-white border-cyan-700'
                             : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
                         }`}
                       >
@@ -857,28 +919,168 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* TAHAP 6: Interval Konduksi & Blok AV (PR, QTc) */}
+            <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
+              <span className="font-bold text-stone-800 flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-emerald-600" />
+                {t.practiceDrill.stage6IntervalsTitle}
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] text-stone-600 block mb-1 font-semibold">
-                    {t.practiceDrill.ventricularHypertrophyLabel}
+                  <label className="text-[10px] text-stone-500 block mb-0.5">{t.practiceDrill.prLabel}</label>
+                  <select
+                    value={form.prStatus}
+                    onChange={(e) => setForm({ ...form, prStatus: e.target.value as any })}
+                    className="w-full bg-white border border-stone-300 rounded px-1.5 py-1 text-base sm:text-[11px] text-stone-800 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                  >
+                    <option value="">{t.practiceDrill.prPlaceholder}</option>
+                    <option value="NORMAL">{t.practiceDrill.prNormal}</option>
+                    <option value="PROLONGED">{t.practiceDrill.prProlonged}</option>
+                    <option value="SHORTENED">{t.practiceDrill.prShortened}</option>
+                    <option value="ABSENT">{t.practiceDrill.prAbsent}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-500 block mb-0.5">{t.practiceDrill.qtcLabel}</label>
+                  <select
+                    value={form.qtcStatus}
+                    onChange={(e) => setForm({ ...form, qtcStatus: e.target.value as any })}
+                    className="w-full bg-white border border-stone-300 rounded px-1.5 py-1 text-base sm:text-[11px] text-stone-800 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                  >
+                    <option value="">{t.practiceDrill.qtcPlaceholder}</option>
+                    <option value="NORMAL">{t.practiceDrill.qtcNormal}</option>
+                    <option value="PROLONGED">{t.practiceDrill.qtcProlonged}</option>
+                    <option value="SHORTENED">{t.practiceDrill.qtcShortened}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* TAHAP 7: Kompleks QRS & Blok Berkas (QRS Duration & BBB) */}
+            <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
+              <span className="font-bold text-stone-800 flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-teal-600" />
+                {t.practiceDrill.stage7QrsTitle}
+              </span>
+              <div className="space-y-2">
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {t.practiceDrill.qrsDurationLabel}
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                  <div className="flex gap-1">
                     {[
-                      { id: 'NORMAL', label: t.practiceDrill.ventricularNormal },
-                      { id: 'LVH', label: t.practiceDrill.ventricularLvh },
-                      { id: 'LVH_STRAIN', label: t.practiceDrill.ventricularLvhStrain },
-                      { id: 'RVH', label: t.practiceDrill.ventricularRvh },
-                    ].map((vt) => (
+                      { id: 'NARROW', label: t.practiceDrill.qrsNarrow },
+                      { id: 'WIDE', label: t.practiceDrill.qrsWide },
+                    ].map((w) => (
                       <button
                         type="button"
-                        key={vt.id}
-                        onClick={() => setForm({ ...form, ventricularHypertrophy: vt.id as any })}
-                        className={`p-1.5 text-[10px] text-left font-bold rounded border transition cursor-pointer ${
-                          form.ventricularHypertrophy === vt.id
-                            ? 'bg-teal-700 text-white border-teal-800'
+                        key={w.id}
+                        onClick={() => setForm({ ...form, qrsStatus: w.id as any })}
+                        className={`flex-1 py-1 text-[10px] font-bold rounded border transition cursor-pointer ${
+                          form.qrsStatus === w.id
+                            ? 'bg-teal-600 text-white border-teal-700'
                             : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
                         }`}
                       >
-                        {vt.label}
+                        {w.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {t.practiceDrill.bbbLabel}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                    {[
+                      { id: 'NONE', label: t.practiceDrill.bbbNone },
+                      { id: 'RBBB', label: t.practiceDrill.bbbRbbb },
+                      { id: 'LBBB', label: t.practiceDrill.bbbLbbb },
+                      { id: 'WPW_PREEXCITATION', label: t.practiceDrill.bbbWpw },
+                    ].map((bb) => (
+                      <button
+                        type="button"
+                        key={bb.id}
+                        onClick={() => setForm({ ...form, bundleBranchBlock: bb.id as any })}
+                        className={`p-1.5 text-[9.5px] text-left rounded border transition cursor-pointer ${
+                          form.bundleBranchBlock === bb.id
+                            ? 'bg-teal-700 text-white border-teal-800 font-bold'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {bb.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder={t.practiceDrill.conductionDefectPlaceholder}
+                    value={form.conductionDefect}
+                    onChange={(e) => setForm({ ...form, conductionDefect: e.target.value })}
+                    className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* TAHAP 8: Progresi Gelombang R Prekordial & Gelombang Q Patologis */}
+            <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
+              <span className="font-bold text-stone-800 flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5 text-orange-600" />
+                {t.practiceDrill.stage8RProgressionTitle}
+              </span>
+              <div className="space-y-2">
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-1 font-semibold">
+                    {t.practiceDrill.rProgressionLabel}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                    {[
+                      { id: 'NORMAL', label: t.practiceDrill.rProgressionNormal },
+                      { id: 'POOR_R_PROGRESSION', label: t.practiceDrill.rProgressionPrwp },
+                      { id: 'EARLY_TRANSITION', label: t.practiceDrill.rProgressionEarly },
+                      { id: 'REVERSED', label: t.practiceDrill.rProgressionReversed },
+                    ].map((rp) => (
+                      <button
+                        type="button"
+                        key={rp.id}
+                        onClick={() => setForm({ ...form, rWaveProgression: rp.id as any })}
+                        className={`p-1.5 text-[9.5px] text-left rounded border transition cursor-pointer ${
+                          form.rWaveProgression === rp.id
+                            ? 'bg-orange-600 text-white border-orange-700 font-bold'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {rp.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-1 font-semibold">
+                    {t.practiceDrill.pathologicQLabel}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                    {[
+                      { id: 'NO', label: t.practiceDrill.pathologicQNone },
+                      { id: 'YES', label: t.practiceDrill.pathologicQPresent },
+                    ].map((q) => (
+                      <button
+                        type="button"
+                        key={q.id}
+                        onClick={() => setForm({ ...form, hasPathologicQ: q.id as any })}
+                        className={`p-1.5 text-[9.5px] text-left rounded border transition cursor-pointer ${
+                          form.hasPathologicQ === q.id
+                            ? 'bg-orange-700 text-white border-orange-800 font-bold'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {q.label}
                       </button>
                     ))}
                   </div>
@@ -886,55 +1088,169 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* TAHAP 7: Morfologi ST-T & Iskemia */}
+            {/* TAHAP 9: Segmen ST, Gelombang T & Gelombang U (Repolarisasi) */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                {t.practiceDrill.stage7StTitle}
+                {t.practiceDrill.stage9StTuTitle}
               </span>
-              <div className="flex flex-wrap gap-1">
-                {[
-                  { id: 'ST_ELEVASI', label: t.practiceDrill.stElevLabel },
-                  { id: 'ST_DEPRESI', label: t.practiceDrill.stDeprLabel },
-                  { id: 'INVERSI_T', label: t.practiceDrill.tInvLabel },
-                  { id: 'Q_PATOLOGIS', label: t.practiceDrill.qWaveLabel },
-                  { id: 'T_LANCIP', label: t.practiceDrill.peakedTLabel },
-                  { id: 'NORMAL_ST', label: t.practiceDrill.stNormalLabel },
-                ].map((f) => {
-                  const active = form.stTFindings.includes(f.id);
-                  return (
-                    <button
-                      type="button"
-                      key={f.id}
-                      onClick={() => toggleStTFinding(f.id)}
-                      className={`px-2 py-1 text-[10px] font-bold rounded border transition cursor-pointer ${
-                        active
-                          ? 'bg-rose-600 text-white border-rose-700'
-                          : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
-                      }`}
-                    >
-                      {active ? '✓ ' : ''}{f.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder={t.practiceDrill.affectedLeadsPlaceholder}
-                  value={form.affectedLeads}
-                  onChange={(e) => setForm({ ...form, affectedLeads: e.target.value })}
-                  className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-rose-500"
-                />
+              <div className="space-y-2">
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {t.practiceDrill.stDeviationLabel}
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
+                    {[
+                      { id: 'ISOELECTRIC', label: t.practiceDrill.stDeviationIsoelectric },
+                      { id: 'ELEVATION', label: t.practiceDrill.stDeviationElevation },
+                      { id: 'DEPRESSION', label: t.practiceDrill.stDeviationDepression },
+                      { id: 'BOTH', label: t.practiceDrill.stDeviationBoth },
+                    ].map((sd) => (
+                      <button
+                        type="button"
+                        key={sd.id}
+                        onClick={() => setForm({ ...form, stDeviation: sd.id as any })}
+                        className={`p-1 text-[9.5px] text-center font-bold rounded border transition cursor-pointer ${
+                          form.stDeviation === sd.id
+                            ? 'bg-rose-600 text-white border-rose-700'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {sd.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {t.practiceDrill.tWaveLabel}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                    {[
+                      { id: 'NORMAL', label: t.practiceDrill.tWaveNormal },
+                      { id: 'INVERTED', label: t.practiceDrill.tWaveInverted },
+                      { id: 'PEAKED_TENTED', label: t.practiceDrill.tWavePeakedTented },
+                      { id: 'FLAT', label: t.practiceDrill.tWaveFlat },
+                    ].map((tw) => (
+                      <button
+                        type="button"
+                        key={tw.id}
+                        onClick={() => setForm({ ...form, tWaveMorphology: tw.id as any })}
+                        className={`p-1.5 text-[9.5px] text-left rounded border transition cursor-pointer ${
+                          form.tWaveMorphology === tw.id
+                            ? 'bg-rose-700 text-white border-rose-800 font-bold'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {tw.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {t.practiceDrill.uWaveLabel}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
+                    {[
+                      { id: 'NORMAL', label: t.practiceDrill.uWaveNormal },
+                      { id: 'PROMINENT', label: t.practiceDrill.uWaveProminent },
+                      { id: 'INVERTED', label: t.practiceDrill.uWaveInverted },
+                    ].map((uw) => (
+                      <button
+                        type="button"
+                        key={uw.id}
+                        onClick={() => setForm({ ...form, uWaveStatus: uw.id as any })}
+                        className={`p-1 text-[9.5px] text-left font-bold rounded border transition cursor-pointer ${
+                          form.uWaveStatus === uw.id
+                            ? 'bg-rose-800 text-white border-rose-900'
+                            : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                        }`}
+                      >
+                        {uw.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-stone-600 block mb-0.5 font-semibold">
+                    {locale === 'en' ? 'Detailed Morphological Findings:' : 'Temuan Morfologis Terperinci:'}
+                  </label>
+                  <div className="flex flex-wrap gap-1">
+                    {[
+                      { id: 'ST_ELEVASI', label: t.practiceDrill.stElevLabel },
+                      { id: 'ST_DEPRESI', label: t.practiceDrill.stDeprLabel },
+                      { id: 'INVERSI_T', label: t.practiceDrill.tInvLabel },
+                      { id: 'Q_PATOLOGIS', label: t.practiceDrill.qWaveLabel },
+                      { id: 'T_LANCIP', label: t.practiceDrill.peakedTLabel },
+                      { id: 'NORMAL_ST', label: t.practiceDrill.stNormalLabel },
+                    ].map((f) => {
+                      const active = form.stTFindings.includes(f.id);
+                      return (
+                        <button
+                          type="button"
+                          key={f.id}
+                          onClick={() => toggleStTFinding(f.id)}
+                          className={`px-2 py-1 text-[10px] font-bold rounded border transition cursor-pointer ${
+                            active
+                              ? 'bg-rose-600 text-white border-rose-700'
+                              : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                          }`}
+                        >
+                          {active ? '✓ ' : ''}{f.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder={t.practiceDrill.affectedLeadsPlaceholder}
+                    value={form.affectedLeads}
+                    onChange={(e) => setForm({ ...form, affectedLeads: e.target.value })}
+                    className="w-full bg-white border border-stone-300 rounded px-2 py-1 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-rose-500"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* TAHAP 8: Kesimpulan & Diagnosis Utama */}
+            {/* TAHAP 10: Teritori Vaskular Anatomi & Sintesis Triase Klinis */}
             <div className="bg-stone-50 p-2.5 rounded-lg border border-stone-200 space-y-2">
               <span className="font-bold text-stone-800 flex items-center gap-1.5">
                 <Award className="w-3.5 h-3.5 text-indigo-600" />
-                {t.practiceDrill.stage8SynthesisTitle}
+                {t.practiceDrill.stage10SynthesisTitle}
               </span>
+
+              {/* Vascular Territory Selection */}
+              <div>
+                <label className="text-[10px] text-stone-600 block mb-1 font-semibold">
+                  {t.practiceDrill.vascularTerritoryLabel}
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                  {[
+                    { id: 'NONE', label: t.practiceDrill.territoryNone },
+                    { id: 'INFERIOR', label: t.practiceDrill.territoryInferior },
+                    { id: 'ANTEROSEPTAL', label: t.practiceDrill.territoryAnteroseptal },
+                    { id: 'LATERAL', label: t.practiceDrill.territoryLateral },
+                    { id: 'POSTERIOR', label: t.practiceDrill.territoryPosterior },
+                    { id: 'DIFFUSE', label: t.practiceDrill.territoryDiffuse },
+                  ].map((ter) => (
+                    <button
+                      type="button"
+                      key={ter.id}
+                      onClick={() => setForm({ ...form, vascularTerritory: ter.id as any })}
+                      className={`p-1.5 text-[9.5px] text-left rounded border transition cursor-pointer ${
+                        form.vascularTerritory === ter.id
+                          ? 'bg-indigo-700 text-white border-indigo-800 font-bold'
+                          : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
+                      }`}
+                    >
+                      {ter.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* 2-Second Global Triage */}
               <div>
@@ -1002,57 +1318,51 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
               </div>
             </div>
 
-            {/* Submit Action Button */}
-            <div className="pt-1">
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold font-sans rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Send className="w-4 h-4" />
-                <span>{t.practice.submitAndEvaluate}</span>
-              </button>
-            </div>
+            {/* Submit button */}
+            <button
+              type="submit"
+              className="w-full py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-sans text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{t.practice.submitAndEvaluate}</span>
+            </button>
           </form>
         ) : (
-          /* DISCREPANCY & COMPARISON MATRIX ("SEBERAPA NGAWUR") */
-          <div className="space-y-3.5 text-xs animate-in fade-in duration-200">
-            {/* 1. Composite Score & Competency Banner */}
-            <div className="p-3 bg-stone-900 text-white rounded-lg space-y-2 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-mono text-purple-300 uppercase tracking-wider block">
-                    {t.practice.evalBannerTitle}
-                  </span>
-                  <h3 className="text-base font-bold text-white flex items-center gap-1.5">
-                    <Award className="w-5 h-5 text-yellow-400" />
-                    {t.practice.accuracyScoreLabel}: {evaluation.totalScore}%
-                  </h3>
-                </div>
-                <span className={`px-2.5 py-1 text-xs font-bold rounded-md border ${evaluation.competencyBadge}`}>
-                  {evaluation.competencyLevel}
-                </span>
+          /* DEBRIEFING & 10-STAGE DISCREPANCY COMPARISON MATRIX */
+          <div className="space-y-4">
+            {/* 1. Composite Score Banner & Competency Level */}
+            <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm text-center space-y-2">
+              <div className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">
+                {t.practice.evalBannerTitle}
               </div>
-              <p className="text-[11px] text-stone-300 leading-snug">
-                {evaluation.competencyDesc}
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-3xl font-black font-mono text-stone-900">{evaluation.totalScore}</span>
+                <span className="text-stone-400 font-bold text-sm">/ 100</span>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border">
+                <Award className="w-3.5 h-3.5" />
+                <span>{evaluation.competencyLevel}</span>
+              </div>
+              <p className="text-xs text-stone-600 max-w-md mx-auto">{evaluation.competencyDesc}</p>
             </div>
 
-            {/* 2. Critical Alert Banner (If Any Serious Underdiagnosis / Overdiagnosis) */}
+            {/* 2. High-Severity Critical Safety Alerts */}
             {evaluation.criticalAlerts.length > 0 && (
-              <div className="space-y-1.5">
+              <div className="bg-rose-50 border border-rose-300 rounded-lg p-3 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-rose-900 font-bold text-xs">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{locale === 'en' ? 'Critical Patient Safety Alerts' : 'Peringatan Keselamatan Pasien Kritis'}</span>
+                </div>
                 {evaluation.criticalAlerts.map((alertText, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-rose-950 text-xs flex items-start gap-2"
-                  >
-                    <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                    <div className="font-semibold leading-relaxed">{alertText}</div>
+                  <div key={idx} className="text-[11px] text-rose-800 leading-snug pl-5 font-semibold">
+                    - {alertText}
                   </div>
                 ))}
               </div>
             )}
 
-            {/* 3. The 8-Stage Side-by-Side Discrepancy Matrix Table */}
+            {/* 3. The 10-Stage Side-by-Side Discrepancy Matrix Table */}
             <div className="border border-stone-200 rounded-lg overflow-hidden shadow-2xs">
               <div className="bg-stone-100 px-3 py-1.5 font-bold text-[11px] text-stone-700 flex justify-between items-center border-b border-stone-200">
                 <span>{t.practiceDrill.tableStageHeader}</span>
@@ -1083,8 +1393,8 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   <div className="grid grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
-                      <strong className="text-stone-900">{form.paperSpeed || '25'} mm/s | {form.voltageSensitivity || '10'} mm/mV</strong>{' '}
-                      <span className="text-stone-500">(aVR: {form.avrOrientation || 'NEGATIVE'})</span>
+                      <strong className="text-stone-900">{form.paperSpeed || '-'} mm/s | {form.voltageSensitivity || '-'} mm/mV</strong>{' '}
+                      <span className="text-stone-500">(aVR: {form.avrOrientation || '-'})</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
@@ -1182,6 +1492,7 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <strong className="text-stone-900">{form.axisClassification || '-'}</strong>
+                      {form.leadIIPolarity && <div className="text-[10px] text-stone-500">Lead II: {form.leadIIPolarity}</div>}
                     </div>
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
@@ -1192,22 +1503,22 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   </div>
                 </div>
 
-                {/* Row 5: Intervals & Conduction */}
+                {/* Row 5: P-Wave Morphology & Atrial Enlargement */}
                 <div className="p-2.5 bg-white space-y-1">
                   <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>5. {t.practiceDrill.stage5IntervalsTitle}</span>
+                    <span>5. {t.practiceDrill.stage5PWaveTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                        evaluation.conductionStatus === 'MATCH'
+                        evaluation.pWaveStatus === 'MATCH'
                           ? 'bg-emerald-100 text-emerald-800'
-                          : evaluation.conductionStatus === 'MILD_DISCREPANCY'
+                          : evaluation.pWaveStatus === 'MILD_DISCREPANCY'
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-rose-100 text-rose-800'
                       }`}
                     >
-                      {evaluation.conductionStatus === 'MATCH'
+                      {evaluation.pWaveStatus === 'MATCH'
                         ? t.practiceDrill.matchStatus
-                        : evaluation.conductionStatus === 'MILD_DISCREPANCY'
+                        : evaluation.pWaveStatus === 'MILD_DISCREPANCY'
                         ? t.practiceDrill.partialStatus
                         : t.practiceDrill.severeStatus}
                     </span>
@@ -1215,34 +1526,33 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   <div className="grid grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
-                      <span>PR: {form.prStatus || '-'}</span> | <span>QRS: {form.qrsStatus || '-'}</span> | <span>QTc: {form.qtcStatus || '-'}</span>
-                      {form.conductionDefect && <div className="text-stone-800 italic">{form.conductionDefect}</div>}
+                      <span>P: {form.pWaveMorphology || '-'}</span> | <span>Atrium: {form.atrialEnlargement || '-'}</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
                       <span className="text-blue-900 font-semibold">
-                        PR: {currentCase.metrics.prIntervalMs} ms | QRS: {currentCase.metrics.qrsDurationMs} ms | QTc: {currentCase.metrics.qtcIntervalMs} ms
+                        P: {evaluation.gtPWave} | Atrium: {evaluation.gtAtrial}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Row 6: Chamber Enlargement & Hypertrophy */}
+                {/* Row 6: Conduction Intervals & AV Blocks */}
                 <div className="p-2.5 bg-white space-y-1">
                   <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>6. {t.practiceDrill.stage6HypertrophyTitle}</span>
+                    <span>6. {t.practiceDrill.stage6IntervalsTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                        evaluation.hypertrophyStatus === 'MATCH'
+                        evaluation.intervalStatus === 'MATCH'
                           ? 'bg-emerald-100 text-emerald-800'
-                          : evaluation.hypertrophyStatus === 'MILD_DISCREPANCY'
+                          : evaluation.intervalStatus === 'MILD_DISCREPANCY'
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-rose-100 text-rose-800'
                       }`}
                     >
-                      {evaluation.hypertrophyStatus === 'MATCH'
+                      {evaluation.intervalStatus === 'MATCH'
                         ? t.practiceDrill.matchStatus
-                        : evaluation.hypertrophyStatus === 'MILD_DISCREPANCY'
+                        : evaluation.intervalStatus === 'MILD_DISCREPANCY'
                         ? t.practiceDrill.partialStatus
                         : t.practiceDrill.severeStatus}
                     </span>
@@ -1250,33 +1560,33 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   <div className="grid grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
-                      <span>Atrium: {form.atrialEnlargement || 'NORMAL'}</span> | <span>Ventrikel: {form.ventricularHypertrophy || 'NORMAL'}</span>
+                      <span>PR: {form.prStatus || '-'}</span> | <span>QTc: {form.qtcStatus || '-'}</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
                       <span className="text-blue-900 font-semibold">
-                        Atrium: {evaluation.gtAtrial} | Ventrikel: {evaluation.gtVentricular}
+                        PR: {currentCase.metrics.prIntervalMs} ms | QTc: {currentCase.metrics.qtcIntervalMs} ms
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Row 7: ST-T Morphology & Ischemia */}
+                {/* Row 7: QRS Complex & Bundle Branch Block */}
                 <div className="p-2.5 bg-white space-y-1">
                   <div className="flex items-center justify-between font-bold text-stone-800">
-                    <span>7. {t.practiceDrill.stage7StTitle}</span>
+                    <span>7. {t.practiceDrill.stage7QrsTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                        evaluation.stStatus === 'MATCH'
+                        evaluation.qrsStatusVerdict === 'MATCH'
                           ? 'bg-emerald-100 text-emerald-800'
-                          : evaluation.stStatus === 'MILD_DISCREPANCY'
+                          : evaluation.qrsStatusVerdict === 'MILD_DISCREPANCY'
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-rose-100 text-rose-800'
                       }`}
                     >
-                      {evaluation.stStatus === 'MATCH'
+                      {evaluation.qrsStatusVerdict === 'MATCH'
                         ? t.practiceDrill.matchStatus
-                        : evaluation.stStatus === 'MILD_DISCREPANCY'
+                        : evaluation.qrsStatusVerdict === 'MILD_DISCREPANCY'
                         ? t.practiceDrill.partialStatus
                         : t.practiceDrill.severeStatus}
                     </span>
@@ -1284,50 +1594,111 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                   <div className="grid grid-cols-2 gap-2 text-stone-600">
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
-                      <div className="font-semibold text-stone-800">
-                        {form.stTFindings.length > 0 ? form.stTFindings.join(', ') : t.practiceDrill.stNormalLabel}
+                      <span>QRS: {form.qrsStatus || '-'}</span> | <span>BBB: {form.bundleBranchBlock || '-'}</span>
+                      {form.conductionDefect && <div className="text-stone-700 italic">{form.conductionDefect}</div>}
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
+                      <span className="text-blue-900 font-semibold">
+                        QRS: {currentCase.metrics.qrsDurationMs} ms ({currentCase.metrics.qrsDurationMs >= 120 ? 'Wide' : 'Narrow'}) | BBB: {evaluation.gtBbb}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 8: Precordial R-Wave Progression & Pathological Q Waves */}
+                <div className="p-2.5 bg-white space-y-1">
+                  <div className="flex items-center justify-between font-bold text-stone-800">
+                    <span>8. {t.practiceDrill.stage8RProgressionTitle}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                        evaluation.progressionStatus === 'MATCH'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : evaluation.progressionStatus === 'MILD_DISCREPANCY'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {evaluation.progressionStatus === 'MATCH'
+                        ? t.practiceDrill.matchStatus
+                        : evaluation.progressionStatus === 'MILD_DISCREPANCY'
+                        ? t.practiceDrill.partialStatus
+                        : t.practiceDrill.severeStatus}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
+                      <span>R: {form.rWaveProgression || '-'}</span> | <span>Q Patologis: {form.hasPathologicQ || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
+                      <span className="text-blue-900 font-semibold">
+                        R: {evaluation.gtProgression} | Q Patologis:{' '}
+                        {evaluation.gtHasQ
+                          ? `${locale === 'en' ? 'Yes' : 'Ya'} (${currentCase.metrics.pathologicQWaveLeads.join(', ')})`
+                          : locale === 'en' ? 'None' : 'Tidak Ada'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 9: ST-Segment, T-Wave & U-Wave Repolarization */}
+                <div className="p-2.5 bg-white space-y-1">
+                  <div className="flex items-center justify-between font-bold text-stone-800">
+                    <span>9. {t.practiceDrill.stage9StTuTitle}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                        evaluation.stTuStatus === 'MATCH'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : evaluation.stTuStatus === 'MILD_DISCREPANCY'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {evaluation.stTuStatus === 'MATCH'
+                        ? t.practiceDrill.matchStatus
+                        : evaluation.stTuStatus === 'MILD_DISCREPANCY'
+                        ? t.practiceDrill.partialStatus
+                        : t.practiceDrill.severeStatus}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-stone-600">
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
+                      <span>ST: {form.stDeviation || '-'}</span> | <span>T: {form.tWaveMorphology || '-'}</span> | <span>U: {form.uWaveStatus || '-'}</span>
+                      {form.affectedLeads && <div className="text-[10px] text-stone-500">Leads: {form.affectedLeads}</div>}
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
+                      <div className="text-blue-900 font-semibold">
+                        ST: {evaluation.gtStDev} | T: {evaluation.gtT} | U: {evaluation.gtU}
                       </div>
-                      <div className="text-[10px] text-stone-500">{locale === 'en' ? 'Leads' : 'Sadapan'}: {form.affectedLeads || '-'}</div>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
-                      {currentCase.metrics.stElevationLeads.length > 0 ? (
-                        <div className="text-rose-800 font-bold">
-                          {locale === 'en' ? 'ST Elevation' : 'ST Elevasi'}: {currentCase.metrics.stElevationLeads.join(', ')}
-                        </div>
-                      ) : (
-                        <div className="text-emerald-800 font-semibold">{t.practiceDrill.noStElevation}</div>
-                      )}
-                      {currentCase.metrics.stDepressionLeads.length > 0 && (
-                        <div className="text-amber-800">
-                          {locale === 'en' ? 'ST Depression' : 'ST Depresi'}: {currentCase.metrics.stDepressionLeads.join(', ')}
-                        </div>
-                      )}
-                      {currentCase.metrics.tWaveInversionLeads.length > 0 && (
-                        <div className="text-indigo-800">
-                          {locale === 'en' ? 'T Inversion' : 'Inversi T'}: {currentCase.metrics.tWaveInversionLeads.join(', ')}
+                      {currentCase.metrics.stElevationLeads.length > 0 && (
+                        <div className="text-rose-700 text-[10px]">
+                          STE: {currentCase.metrics.stElevationLeads.join(', ')}
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Row 8: Final Clinical Diagnosis */}
+                {/* Row 10: Vascular Territory & Clinical Synthesis */}
                 <div className="p-2.5 bg-purple-50/40 space-y-1">
                   <div className="flex items-center justify-between font-bold text-purple-950">
-                    <span>8. {t.practiceDrill.stage8SynthesisTitle}</span>
+                    <span>10. {t.practiceDrill.stage10SynthesisTitle}</span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                        evaluation.diagStatus === 'MATCH'
+                        evaluation.synthesisStatus === 'MATCH'
                           ? 'bg-emerald-100 text-emerald-800'
-                          : evaluation.diagStatus === 'MILD_DISCREPANCY'
+                          : evaluation.synthesisStatus === 'MILD_DISCREPANCY'
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-rose-100 text-rose-800'
                       }`}
                     >
-                      {evaluation.diagStatus === 'MATCH'
+                      {evaluation.synthesisStatus === 'MATCH'
                         ? t.practiceDrill.matchStatus
-                        : evaluation.diagStatus === 'MILD_DISCREPANCY'
+                        : evaluation.synthesisStatus === 'MILD_DISCREPANCY'
                         ? t.practiceDrill.closeStatus
                         : t.practiceDrill.severeStatus}
                     </span>
@@ -1336,13 +1707,13 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.yourAnswerLabel}:</span>
                       <div className="p-1.5 bg-white rounded border border-stone-200 text-stone-900 font-semibold text-xs">
-                        [{form.triageCategory || 'Triase -'}] "{form.clinicalDiagnosis}"
+                        [{form.vascularTerritory || 'Territory -'}] [{form.triageCategory || 'Triase -'}] "{form.clinicalDiagnosis}"
                       </div>
                     </div>
                     <div>
                       <span className="text-[10px] text-stone-600 block">{t.practiceDrill.goldStandardLabel}:</span>
                       <div className="p-1.5 bg-emerald-50 rounded border border-emerald-200 text-emerald-950 font-bold text-xs">
-                        [{currentCase.category}] {locale === 'en' && currentCase.medicalTermEn ? currentCase.medicalTermEn : currentCase.title}
+                        [{evaluation.gtTerritory}] [{currentCase.category}] {locale === 'en' && currentCase.medicalTermEn ? currentCase.medicalTermEn : currentCase.title}
                       </div>
                     </div>
                   </div>
@@ -1356,19 +1727,24 @@ export const ThalerPracticeDrill: React.FC<ThalerPracticeDrillProps> = ({
                 type="button"
                 onClick={() => {
                   const mappedAnswers: Record<string, string> = {
-                    calibration: `${form.paperSpeed || '25'} mm/s, ${form.voltageSensitivity || '10'} mm/mV, aVR ${form.avrOrientation || 'NEGATIVE'}`,
+                    calibration: `${form.paperSpeed || '-'} mm/s, ${form.voltageSensitivity || '-'} mm/mV, aVR ${form.avrOrientation || '-'}`,
                     heartRate: form.heartRateBpm,
                     rateCategory: form.rateCategory,
                     regularity: form.regularity,
                     rhythmType: form.rhythmOrigin,
                     axisClassification: form.axisClassification,
+                    pWaveMorphology: form.pWaveMorphology,
+                    atrialEnlargement: form.atrialEnlargement,
                     prIntervalStatus: form.prStatus,
-                    qrsWidth: form.qrsStatus,
                     qtcStatus: form.qtcStatus,
-                    hypertrophyAtrial: form.atrialEnlargement,
-                    hypertrophyVentricular: form.ventricularHypertrophy,
-                    stMorphology: form.stTFindings.join(', '),
-                    ischemiaLeads: form.affectedLeads,
+                    qrsWidth: form.qrsStatus,
+                    bundleBranchBlock: form.bundleBranchBlock,
+                    rWaveProgression: form.rWaveProgression,
+                    pathologicalQ: form.hasPathologicQ,
+                    stDeviation: form.stDeviation,
+                    tWaveMorphology: form.tWaveMorphology,
+                    uWaveStatus: form.uWaveStatus,
+                    vascularTerritory: form.vascularTerritory,
                     clinicalDiagnosis: `[${form.triageCategory}] ${form.clinicalDiagnosis}`,
                   };
                   ThalerPdfExportEngine.exportPracticeDebriefReport(

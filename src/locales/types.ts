@@ -515,31 +515,86 @@ export interface TranslationDictionary {
     stage2RateTitle: string;
     // Stage 3: Rhythm
     stage3RhythmTitle: string;
+    rhythmRegularityLabel: string;
     // Stage 4: Axis
     stage4AxisTitle: string;
-    // Stage 5: Intervals & Conduction
-    stage5IntervalsTitle: string;
+    leadIIPolarityLabel: string;
+    leadIIPositive: string;
+    leadIINegative: string;
+    // Stage 5: P-Wave Morphology & Atrial Enlargement
+    stage5PWaveTitle: string;
+    pWaveMorphologyLabel: string;
+    pWaveNormalSinus: string;
+    pWaveEctopicAtrial: string;
+    pWaveRetrograde: string;
+    pWaveAbsentFib: string;
+    pWaveFlutter: string;
+    pWaveDissociated: string;
+    atrialEnlargementLabel: string;
+    atrialNormal: string;
+    atrialRae: string;
+    atrialLae: string;
+    atrialBiatrial: string;
+    // Stage 6: Intervals & Conduction
+    stage6IntervalsTitle: string;
+    stage5IntervalsTitle: string; // backwards compatibility
     qtcLabel: string;
     qtcPlaceholder: string;
     qtcNormal: string;
     qtcProlonged: string;
     qtcShortened: string;
-    // Stage 6: Chamber Enlargement & Hypertrophy
-    stage6HypertrophyTitle: string;
-    stage6HypertrophyHint: string;
-    atrialEnlargementLabel: string;
-    atrialNormal: string;
-    atrialRae: string;
-    atrialLae: string;
+    // Stage 7: QRS Duration & Bundle Branch Block
+    stage7QrsTitle: string;
+    qrsDurationLabel: string;
+    bbbLabel: string;
+    bbbNone: string;
+    bbbRbbb: string;
+    bbbLbbb: string;
+    bbbWpw: string;
+    // Stage 8: Precordial R-Wave Progression & Pathological Q Waves
+    stage8RProgressionTitle: string;
+    rProgressionLabel: string;
+    rProgressionNormal: string;
+    rProgressionPrwp: string;
+    rProgressionEarly: string;
+    rProgressionReversed: string;
+    pathologicQLabel: string;
+    pathologicQNone: string;
+    pathologicQPresent: string;
+    // Stage 9: ST-Segment, T-Wave & U-Wave Repolarization
+    stage9StTuTitle: string;
+    stDeviationLabel: string;
+    stDeviationIsoelectric: string;
+    stDeviationElevation: string;
+    stDeviationDepression: string;
+    stDeviationBoth: string;
+    tWaveLabel: string;
+    tWaveNormal: string;
+    tWaveInverted: string;
+    tWavePeakedTented: string;
+    tWaveFlat: string;
+    uWaveLabel: string;
+    uWaveNormal: string;
+    uWaveProminent: string;
+    uWaveInverted: string;
+    // Stage 10: Vascular Territory & Clinical Synthesis
+    stage10SynthesisTitle: string;
+    stage8SynthesisTitle: string; // backwards compatibility
+    stage6HypertrophyTitle: string; // backwards compatibility
+    stage6HypertrophyHint: string; // backwards compatibility
+    stage7StTitle: string; // backwards compatibility
     ventricularHypertrophyLabel: string;
     ventricularNormal: string;
     ventricularLvh: string;
     ventricularLvhStrain: string;
     ventricularRvh: string;
-    // Stage 7: Ischemia & ST-T
-    stage7StTitle: string;
-    // Stage 8: Synthesis & Triage
-    stage8SynthesisTitle: string;
+    vascularTerritoryLabel: string;
+    territoryNone: string;
+    territoryInferior: string;
+    territoryAnteroseptal: string;
+    territoryLateral: string;
+    territoryPosterior: string;
+    territoryDiffuse: string;
   };
   completion: {
     foundationDoneBadge: string;

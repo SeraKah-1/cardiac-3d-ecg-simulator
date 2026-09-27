@@ -135,6 +135,44 @@ if (peCase) {
   assert(peCase.metrics.tWaveInversionLeads.length > 0, 'PE case has anterior/inferior T wave inversion');
 }
 
+console.log('=== TEST SUITE 5: 10-STEP SYSTEMATIC CLINICAL REPOSITORY INVARIANTS ===');
+
+// Verify all 21 cases have complete, strongly typed 10-step metrics
+THALER_EKG_CASES.forEach((c) => {
+  assert(Boolean(c.metrics.pWaveMorphology), `${c.id} has valid pWaveMorphology (${c.metrics.pWaveMorphology})`);
+  assert(Boolean(c.metrics.atrialEnlargement), `${c.id} has valid atrialEnlargement (${c.metrics.atrialEnlargement})`);
+  assert(Boolean(c.metrics.ventricularHypertrophy), `${c.id} has valid ventricularHypertrophy (${c.metrics.ventricularHypertrophy})`);
+  assert(Boolean(c.metrics.bundleBranchBlock), `${c.id} has valid bundleBranchBlock (${c.metrics.bundleBranchBlock})`);
+  assert(Boolean(c.metrics.rWaveProgression), `${c.id} has valid rWaveProgression (${c.metrics.rWaveProgression})`);
+  assert(Boolean(c.metrics.uWaveStatus), `${c.id} has valid uWaveStatus (${c.metrics.uWaveStatus})`);
+});
+
+// Specific clinical ground-truth validations
+const afib = THALER_EKG_CASES.find((c) => c.id === 'case_atrial_fibrillation');
+assert(afib?.metrics.pWaveMorphology === 'ABSENT_FIBRILLATORY', 'AFib has ABSENT_FIBRILLATORY P-waves');
+
+const aflutter = THALER_EKG_CASES.find((c) => c.id === 'case_atrial_flutter');
+assert(aflutter?.metrics.pWaveMorphology === 'FLUTTER', 'Atrial Flutter has FLUTTER P-waves');
+
+const chb = THALER_EKG_CASES.find((c) => c.id === 'case_complete_heart_block');
+assert(chb?.metrics.pWaveMorphology === 'DISSOCIATED', 'Complete Heart Block has DISSOCIATED P-waves');
+
+const rbbbCase = THALER_EKG_CASES.find((c) => c.id === 'case_rbbb');
+assert(rbbbCase?.metrics.bundleBranchBlock === 'RBBB', 'RBBB case has RBBB block');
+
+const lbbbCase = THALER_EKG_CASES.find((c) => c.id === 'case_lbbb');
+assert(lbbbCase?.metrics.bundleBranchBlock === 'LBBB', 'LBBB case has LBBB block');
+assert(lbbbCase?.metrics.rWaveProgression === 'POOR_R_PROGRESSION', 'LBBB has poor R-wave progression');
+
+const wpwCase = THALER_EKG_CASES.find((c) => c.id === 'case_wpw_syndrome');
+assert(wpwCase?.metrics.bundleBranchBlock === 'WPW_PREEXCITATION', 'WPW case has WPW_PREEXCITATION');
+
+const postStemi = THALER_EKG_CASES.find((c) => c.id === 'case_posterior_stemi');
+assert(postStemi?.metrics.rWaveProgression === 'REVERSED', 'Posterior STEMI has REVERSED precordial R progression (tall R in V1)');
+
+const hypokalemiaCase = THALER_EKG_CASES.find((c) => c.id === 'case_severe_hypokalemia');
+assert(hypokalemiaCase?.metrics.uWaveStatus === 'PROMINENT', 'Severe Hypokalemia has PROMINENT U waves');
+
 console.log(`\n========================================`);
 console.log(`TOTAL PASS: ${passCount}`);
 console.log(`TOTAL FAIL: ${failCount}`);

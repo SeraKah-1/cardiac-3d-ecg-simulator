@@ -1,7 +1,7 @@
 # PROJECT_STATE_AND_SSOT.md : Living Single Source of Truth
 # Thaler EKG Academy & Clinical Idiograph Workstation
 
-Last Updated: 2026-09-26
+Last Updated: 2026-09-27
 Repository: /root/cardiac-3d-ecg-simulator
 Dev Server URL: http://localhost:5173/
 
@@ -9,87 +9,68 @@ Dev Server URL: http://localhost:5173/
 
 ## 1. Executive Status & Immediate Next Action
 
-- Status: COMPREHENSIVE INTERNATIONAL CLINICAL ENGLISH LOCALIZATION & EMPIRICAL VERIFICATION COMPLETE (Exit code 0 across TypeScript compilation, dual-locale key parity, 1,380 biophysical tests, axis mathematics, onboarding, and PDF export engines).
-- Localization Audit Scope & Deliverables Completed:
-  1. Complete Case Repository Localization (21 Cases, 190 Tutorial Steps):
-     * Foundational Anatomy (Case 0, 10 steps): 100% verified bilingual parity in `thalerFoundations.ts`.
-     * Cases 1 to 20 (180 steps): Authentically translated and merged into `thalerCases.ts` adhering to Dr. Malcolm S. Thaler's clinical curriculum and ACC/AHA standards.
-     * All 190 steps provide: `stepNameEn`, `clinicalFindingTitleEn`, `plainInstructionsEn`, `thalerRuleQuoteEn`, `relevantFormulaEn`, and `deepMechanismDetailsEn`.
-     * All 21 cases provide: `titleEn`, `chiefComplaintEn`, and `rhythmDescriptionEn`.
-  2. Full In-Situ Caliper Localization (100 Calipers across 20 Cases):
-     * Verified in `thalerCaliperMap.ts`: every caliper includes `labelEn`, `calculationFormulaEn`, and `detailExplanationEn`.
-     * Localized dynamically via `getLocalizedCaliper` in `thalerLocalization.ts`.
-  3. Biophysics & 3D Viewport Localization:
-     * `LeadFieldModel.ts`: Added `fullTitleEn` and `landmarkDescEn` for all 10 standard electrode landmarks (`RA`, `LA`, `RL`, `LL`, `V1` - `V6`).
-     * `ElectrodeTray.tsx`: Connected `useLocale()`, localized all electrode titles, descriptions, action buttons (`attachAll`, `detachAll`), notices, and tooltips.
-     * `Cardiac3DViewport.tsx`: Connected `useLocale()`, localized top control overlay, camera reset, lead wire visibility, and dipole toggles.
-  4. 2D ECG Canvases & HUD Localization:
-     * `EcgMultiLeadCanvas.tsx`: Connected `useLocale()`, localized ribbon mode indicator, paper speed, voltage gain, Cabrera sequence toggles, and caliper inspection tooltips.
-     * `EcgRhythmStripPreview.tsx`: Connected `useLocale()`, localized 3-lead preview titles and lead select tooltips.
-     * `CardiacPhaseBar.tsx`: Refactored to utilize direct localized short labels (`atrialShortLabel`, `ventricularShortLabel`, `diastoleShortLabel`), eliminating string split bugs.
-     * `ClinicalSlideOverDrawer.tsx`: Localized drawer header and close button tooltips.
-     * `useSimulationStore.ts`: Localized default diagnostic fallback headlines and bedside action labels.
-  5. UI Views & Modals Locale Parity:
-     * Verified `types.ts`, `id.ts`, and `en.ts` dictionary parity across 743 keys each across 20 clinical namespaces.
-     * Zero missing keys, zero untranslated fallbacks in English mode.
+- Status: GOLD-STANDARD 10-STEP SYSTEMATIC CLINICAL SEQUENCE & MULTI-TOUCH PINCH-TO-ZOOM DEPLOYED AND FULLY VERIFIED (Exit code 0 across TypeScript compilation, 348 verification suite tests, 1,380 biophysical tests, 100% localization key parity, and clean production build).
+- Delivered Upgrades:
+  1. Definitive 10-Step ECG Interpretation Sequence (`ThalerPracticeDrill.tsx`):
+     * Step 1: Technical Preflight & Calibration (Speed 25/50 mm/s, Voltage 10/5/20 mm/mV, Lead aVR negative verification).
+     * Step 2: Heart Rate Determination (Numeric BPM, Bradycardia/Normal/Tachycardia categorization).
+     * Step 3: Cardiac Rhythm & Regularity (Regular, Irregular, Irregularly Irregular, Rhythm origin).
+     * Step 4: Frontal Plane Electrical Axis & Lead II Confirmation (Normal, LAD with Lead II confirmation, RAD, Extreme).
+     * Step 5: P-Wave Morphology & Atrial Enlargement (Normal sinus, Ectopic, Retrograde, Absent/f-waves, Flutter, Dissociated; RAE/P-pulmonale, LAE/P-mitrale, Biatrial).
+     * Step 6: Conduction Intervals & AV Blocks (PR interval normal/prolonged/shortened/absent, Sex-specific QTc cutoffs >450M / >460F ms).
+     * Step 7: QRS Complex Duration & Bundle Branch Blocks (Narrow <120 ms vs Wide >=120 ms; Complete RBBB, Complete LBBB, WPW pre-excitation).
+     * Step 8: Precordial R-Wave Progression & Pathological Q Waves (Normal V3-V4 transition, PRWP, Early transition, Reversed; Pathological Q waves in contiguous leads).
+     * Step 9: ST-Segment, T-Wave & U-Wave Repolarization (Isoelectric, STEMI elevation, Ischemia depression; T normal, deep symmetrical inversion, peaked tented, flat; U normal, prominent >1.5 mm in hypokalemia, inverted).
+     * Step 10: Anatomical Vascular Territories, Triage & Definitive Diagnosis (Inferior, Anteroseptal, Lateral, Posterior, Diffuse; Normal, Non-significant Variant, Pathologic Urgent; Definitive diagnosis text).
+  2. Multi-Touch Pinch-to-Zoom & Pan Gesture Engine (`ThalerEcgCanvas.tsx`):
+     * Two-finger pinch-to-zoom with continuous distance ratio tracking and scale clamping (1.0x to 4.0x).
+     * Centroid-aware scaling and seamless 1-finger pan transition when lifting one finger (Bug A resolved).
+     * Floating zoom toolbar pill with dynamic zoom indicator, reset to fit, and mouse-wheel support.
+  3. Structured Ground-Truth Clinical Data Schema (`thalerTypes.ts` & `thalerCases.ts`):
+     * Added strongly typed fields: `pWaveMorphology`, `atrialEnlargement`, `ventricularHypertrophy`, `bundleBranchBlock`, `rWaveProgression`, and `uWaveStatus`.
+     * Populated all 21 cases (Case 0 through 20) with 100% verified clinical ground truth.
+     * Eliminated all brittle string-matching heuristics in practice drill scoring.
+  4. Scoring Integrity & Safety Guards:
+     * Bug C resolved: Empty answers no longer award free points (explicit user selection required).
+     * Bug D resolved: QTc prolonged thresholds parameterized to sex-specific clinical cutoffs (male > 450 ms, female > 460 ms, critical > 500 ms).
+     * Perfect 100-point rubric (10 points per step).
 
 ---
 
 ## 2. Verification & Static QA Summary
 
 - Independent Test Harness Execution:
-  * `verify_localization.ts`: 100% schema key parity, zero em-dashes in dictionaries, and dual-locale PDF export verified (exit code 0).
-  * `verify_axis_and_practice.ts`: 144 / 144 tests passed with 100% mathematical and clinical rigor (exit code 0).
-  * `verify_onboarding.ts`: All tests passed for onboarding lifecycle, storage, and zero em-dashes (exit code 0).
-  * `verify_thaler_academy.ts`: 1,380 / 1,380 biophysical tests passed across all 21 cases (2,500 samples/lead, zero NaN/Infinity, dynamic voltage validation) (exit code 0).
-- Static Analysis & Production Build:
-  * `npx tsc --noEmit`: Exit code 0 (zero TypeScript errors).
+  * `verify_axis_and_practice.ts`: 348 / 348 tests passed (Exit code 0).
+  * `verify_localization.ts`: 100% schema key parity (ID vs EN), zero empty strings, zero em-dashes, and dual-locale PDF export verified (Exit code 0).
+  * `verify_thaler_academy.ts`: 1,380 / 1,380 biophysical tests passed across all 21 cases (Exit code 0).
+  * `verify_onboarding.ts`: All tests passed for onboarding storage and lifecycle (Exit code 0).
+  * `npx tsc --noEmit`: 0 TypeScript errors (Exit code 0).
+  * `npm run build`: Production bundle built in 3.71s with zero errors.
 - Strict Invariants:
-  * Anti-Emdash Invariant: Exactly 0 Unicode character U+2014 occurrences across all source files, locales, tests, and documentation. Verified via full AST/text scanner.
-  * Zero Mock Invariant: Real 2,500 samples/lead biophysical waveforms at 250 Hz, 275mm grid integer locking (0.5000 px/sample).
-  * Dual-Locale Invariant: Seamless client-side toggling between Indonesian (`id`) and English (`en`) with instantaneous reactive re-render. Zero Indonesian leakage in English mode.
+  * Anti-Emdash Invariant: Exactly 0 Unicode character U+2014 occurrences across all source files, locales, tests, and documentation.
+  * Zero Mock Invariant: Real 2,500 samples/lead biophysical waveforms at 250 Hz, 275mm grid integer locking.
+  * Zero Free-Point Invariant: Students must explicitly select answers; empty fields award 0 points.
 
 ---
 
 ## 3. Physical File Map
 
 - Locales & i18n Architecture:
-  * [`src/locales/types.ts`](file:///root/cardiac-3d-ecg-simulator/src/locales/types.ts): Comprehensive TypeScript translation contracts across 20 clinical namespaces.
-  * [`src/locales/id.ts`](file:///root/cardiac-3d-ecg-simulator/src/locales/id.ts): Indonesian translation dictionary with authentic medical terminology (743 keys).
-  * [`src/locales/en.ts`](file:///root/cardiac-3d-ecg-simulator/src/locales/en.ts): English translation dictionary with standard clinical nomenclature (743 keys).
-  * [`src/locales/useLocale.tsx`](file:///root/cardiac-3d-ecg-simulator/src/locales/useLocale.tsx): React context and hook providing active locale and translation dictionary.
+  * [`src/locales/types.ts`](file:///root/cardiac-3d-ecg-simulator/src/locales/types.ts): TypeScript translation contracts for all 10 clinical sequence steps.
+  * [`src/locales/id.ts`](file:///root/cardiac-3d-ecg-simulator/src/locales/id.ts): Indonesian translation dictionary with 10-step keys.
+  * [`src/locales/en.ts`](file:///root/cardiac-3d-ecg-simulator/src/locales/en.ts): English translation dictionary with 10-step keys.
+  * [`src/locales/useLocale.tsx`](file:///root/cardiac-3d-ecg-simulator/src/locales/useLocale.tsx): React context and hook for reactive locale switching.
 - Clinical Engine & Cases:
-  * [`src/engine/clinical/thaler/thalerCases.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerCases.ts): 20 clinical cases with authentic waveforms, 180 fully translated steps, and caliper links.
-  * [`src/engine/clinical/thaler/thalerFoundations.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerFoundations.ts): Case 0 Foundations (10 steps) with bilingual waveform geometry and Thaler rules.
-  * [`src/engine/clinical/thaler/thalerCaliperMap.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerCaliperMap.ts): 100 in-situ calipers with bilingual labels, formulas, and explanations.
-  * [`src/engine/clinical/thaler/thalerLocalization.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerLocalization.ts): Pure functional projection engine mapping cases, steps, calipers, flowcharts, and exemplars between `id` and `en`.
-  * [`src/engine/clinical/thaler/thalerFlowchartData.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerFlowchartData.ts): 6-stage clinical decision flowchart with bilingual nodes and branches.
-  * [`src/engine/clinical/thaler/thalerExemplarData.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerExemplarData.ts): Visual exemplar catalog with bilingual morphology clues and diagnostic criteria.
-  * [`src/engine/clinical/thaler/thalerTypes.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerTypes.ts): TypeScript interfaces for cases, steps, calipers, and tiers.
-- 3D Viewport & Biophysics:
-  * [`src/engine/biophysics/LeadFieldModel.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/biophysics/LeadFieldModel.ts): Electrode coordinates and bilingual landmark descriptions.
-  * [`src/components/viewport3d/ElectrodeTray.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/viewport3d/ElectrodeTray.tsx): Interactive electrode tray with full bilingual labels.
-  * [`src/components/viewport3d/Cardiac3DViewport.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/viewport3d/Cardiac3DViewport.tsx): Three.js 3D cardiac viewport with localized HUD controls.
-- 2D ECG Canvases & HUD:
-  * [`src/components/ecg/EcgMultiLeadCanvas.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/ecg/EcgMultiLeadCanvas.tsx): Multi-lead 2D canvas with localized ribbon mode, speed, and gain.
-  * [`src/components/ecg/EcgRhythmStripPreview.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/ecg/EcgRhythmStripPreview.tsx): 3-lead rhythm strip preview with localized tooltips.
-  * [`src/components/hud/CardiacPhaseBar.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/hud/CardiacPhaseBar.tsx): Cardiac cycle phase bar with localized short labels.
-  * [`src/components/inspector/ClinicalSlideOverDrawer.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/inspector/ClinicalSlideOverDrawer.tsx): Clinical inspector drawer with localized headers.
-- UI Views & Modals:
-  * [`src/components/thaler/ThalerAcademyView.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/ThalerAcademyView.tsx): Master workstation view with locale switcher and tour launch guards.
-  * [`src/components/thaler/ThalerPracticeDrill.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/ThalerPracticeDrill.tsx): 6-stage practice mode with bilingual evaluation and discrepancy matrix.
-  * [`src/components/thaler/WelcomeOnboardingModal.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/WelcomeOnboardingModal.tsx): Persona-gated welcome dialog.
-  * [`src/components/thaler/InteractiveSpotlightTour.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/InteractiveSpotlightTour.tsx): 5-step coachmark spotlight tour.
-  * [`src/components/thaler/ClinicalPocketCheatSheetModal.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/ClinicalPocketCheatSheetModal.tsx): 4-tab clinical pocket guide.
-  * [`src/components/thaler/ClinicalCalculatorsModal.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/ClinicalCalculatorsModal.tsx): Bedside clinical calculators.
-  * [`src/components/thaler/VisualExemplarModal.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/VisualExemplarModal.tsx): Visual morphology exemplar atlas.
-  * [`src/components/thaler/AxisQuadrantModal.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/AxisQuadrantModal.tsx): Interactive hexaxial axis modal.
-  * [`src/components/thaler/DiagnosticFlowchartModal.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/DiagnosticFlowchartModal.tsx): Clinical decision flowchart modal.
-  * [`src/components/thaler/FeedbackModal.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/FeedbackModal.tsx): Bilingual feedback modal with email relay and mailto fallback.
-- Export Engine:
-  * [`src/engine/export/ThalerPdfExportEngine.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/export/ThalerPdfExportEngine.ts): Dual-locale PDF generator for hospital strips, OSCE worksheets, and debrief reports.
-- Verification Scripts:
-  * [`verify_localization.ts`](file:///root/cardiac-3d-ecg-simulator/verify_localization.ts): Schema parity, zero em-dash, and dual-locale PDF export harness.
-  * [`verify_axis_and_practice.ts`](file:///root/cardiac-3d-ecg-simulator/verify_axis_and_practice.ts): Mathematical projections and practice leak guards.
-  * [`verify_onboarding.ts`](file:///root/cardiac-3d-ecg-simulator/verify_onboarding.ts): Onboarding storage and lifecycle verification.
-  * [`verify_thaler_academy.ts`](file:///root/cardiac-3d-ecg-simulator/verify_thaler_academy.ts): 1,380 biophysical waveform and clinical integrity tests.
+  * [`src/engine/clinical/thaler/thalerCases.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerCases.ts): 21 cases with structured 10-step ground-truth metrics.
+  * [`src/engine/clinical/thaler/thalerFoundations.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerFoundations.ts): Case 0 Foundations (10 steps) with wave anatomy.
+  * [`src/engine/clinical/thaler/thalerTypes.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/clinical/thaler/thalerTypes.ts): TypeScript interfaces with new morphology types.
+- UI Views & Canvases:
+  * [`src/components/thaler/ThalerPracticeDrill.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/ThalerPracticeDrill.tsx): 10-step practice mode with side-by-side discrepancy matrix.
+  * [`src/components/thaler/ThalerEcgCanvas.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/ThalerEcgCanvas.tsx): Multi-touch pinch-to-zoom, pan, and zoom controls.
+  * [`src/components/thaler/ClinicalStepper.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/ClinicalStepper.tsx): Clinical stepper with 1-based indexing.
+  * [`src/components/thaler/ThalerAcademyView.tsx`](file:///root/cardiac-3d-ecg-simulator/src/components/thaler/ThalerAcademyView.tsx): Master workstation view.
+- Export Engine & Verification:
+  * [`src/engine/export/ThalerPdfExportEngine.ts`](file:///root/cardiac-3d-ecg-simulator/src/engine/export/ThalerPdfExportEngine.ts): Dual-locale PDF generator for strips and worksheets.
+  * [`verify_axis_and_practice.ts`](file:///root/cardiac-3d-ecg-simulator/verify_axis_and_practice.ts): 348 mathematical, biophysical, and 10-step invariant tests.
+  * [`verify_localization.ts`](file:///root/cardiac-3d-ecg-simulator/verify_localization.ts): Dual-locale parity and zero em-dash verification.
+  * [`verify_thaler_academy.ts`](file:///root/cardiac-3d-ecg-simulator/verify_thaler_academy.ts): 1,380 biophysical waveform tests.

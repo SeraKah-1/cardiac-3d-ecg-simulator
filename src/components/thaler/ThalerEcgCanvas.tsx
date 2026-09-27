@@ -592,7 +592,21 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     if (activePointers.current.size < 2) {
       pinchInitialRef.current = null;
     }
-    if (activePointers.current.size === 0) {
+    if (activePointers.current.size === 1) {
+      // Bug fix: Re-seed panInitialRef for the remaining pointer so 1-finger pan continues seamlessly
+      const remainingPointer = Array.from(activePointers.current.values())[0];
+      if (remainingPointer && localZoom > 1.05 && !isCaliperActive) {
+        panInitialRef.current = {
+          startX: remainingPointer.clientX,
+          startY: remainingPointer.clientY,
+          initialCenterX: localCenterX,
+          initialCenterY: localCenterY,
+        };
+      } else {
+        panInitialRef.current = null;
+        setIsGestureActive(false);
+      }
+    } else if (activePointers.current.size === 0) {
       panInitialRef.current = null;
       setIsGestureActive(false);
       setIsDraggingCaliper(false);
