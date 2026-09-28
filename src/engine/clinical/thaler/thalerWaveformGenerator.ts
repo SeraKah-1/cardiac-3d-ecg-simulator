@@ -1,7 +1,11 @@
 /**
  * Biophysical & Mathematical Waveform Generator for Thaler EKG Academy
- * Produces continuous 12-lead voltage arrays (mV) across 10 seconds at 250 Hz.
- * Incorporates genuine biophysical wave morphology: P, Q, R, S, J-point, ST segment, T, and U waves.
+ * Employs State-of-the-Art Piecewise Compact Hermite Smoothstep (PCHS) Engine.
+ * Guarantees:
+ * 1. Strictly compact support with true 0.0000 mV isoelectric PR, ST, and TP segments.
+ * 2. Exact millimeter box fidelity: P wave = 80 ms (2 boxes), QRS = 80 ms (2 boxes).
+ * 3. Non-destructive sequential Q-R-S synthesis (no flank swallowing in Lead II or V1).
+ * 4. Continuous C^2 quintic smoothstep transitions eliminating cycle boundary step jumps.
  * Zero em-dash compliance. Zero mock shortcuts.
  */
 
@@ -49,71 +53,210 @@ interface WaveParams {
 
 const LEADS = ['I', 'II', 'III', 'aVR', 'aVL', 'aVF', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6'];
 
-// Gaussian wave helper
-function gaussian(t: number, center: number, width: number, amplitude: number): number {
-  const diff = (t - center) / width;
-  return amplitude * Math.exp(-0.5 * diff * diff);
+/**
+ * Quintic Smoothstep Basis Function: S_5(u) = 6u^5 - 15u^4 + 10u^3
+ * C^2 continuous: first and second derivatives are identically zero at boundaries.
+ */
+function smoothstep5(u: number): number {
+  if (u <= 0.0) return 0.0;
+  if (u >= 1.0) return 1.0;
+  return u * u * u * (u * (u * 6.0 - 15.0) + 10.0);
 }
 
-// Generates a single beat for a lead
+/**
+ * Compact smooth Hermite transition between (t0, v0) and (t1, v1)
+ */
+function hermiteSegment(t: number, t0: number, t1: number, v0: number, v1: number): number {
+  if (t <= t0) return v0;
+  if (t >= t1) return v1;
+  const u = (t - t0) / (t1 - t0);
+  return v0 + (v1 - v0) * smoothstep5(u);
+}
+
+/**
+ * Generates a single beat for a lead using the Piecewise Compact Hermite Smoothstep (PCHS) Engine.
+ * Replaces unbounded Gaussians to eliminate baseline drift, flank swallowing, and cycle boundary jumps.
+ */
 function generateSingleBeat(tInBeat: number, p: WaveParams): number {
-  let v = 0;
-
-  // 1. P wave (centered at ~0.08s)
-  const pCenter = 0.08;
-  v += gaussian(tInBeat, pCenter, p.pWidth, p.pAmp);
-
-  // QRS start
-  const qrsStart = pCenter + p.prInterval - 0.04;
-
-  // Delta wave (WPW)
-  if (p.hasDeltaWave) {
-    v += gaussian(tInBeat, qrsStart + 0.02, 0.025, p.rAmp * 0.35);
+  // 1. P Wave: strictly compact on [tP0, tP2] (duration exactly 80 ms = 2 small boxes)
+  if (Math.abs(p.pAmp) > 1e-4) {
+    const tP0 = 0.048;
+    const tP1 = 0.088;
+    const tP2 = 0.128;
+    if (tInBeat >= tP0 && tInBeat <= tP2) {
+      if (tInBeat <= tP1) {
+        return hermiteSegment(tInBeat, tP0, tP1, 0.0, p.pAmp);
+      } else {
+        return hermiteSegment(tInBeat, tP1, tP2, p.pAmp, 0.0);
+      }
+    }
   }
 
-  // 2. Q wave
-  const qCenter = qrsStart + 0.025;
-  if (p.qAmp !== 0) {
-    v += gaussian(tInBeat, qCenter, 0.015, -Math.abs(p.qAmp));
+  // 2. PR Segment: [0.128, qrsStart] -> strictly 0.0000 mV isoelectric line
+  const qrsStart = Math.abs(p.pAmp) > 1e-4
+    ? 0.048 + Math.max(0.08, p.prInterval)
+    : Math.max(0.02, p.prInterval || 0.04);
+
+  if (tInBeat < qrsStart) {
+    return 0.0;
   }
 
-  // 3. R wave & Rabbit Ears / LBBB notching
-  const rCenter = qrsStart + 0.045;
-  if (p.hasRabbitEars) {
-    // rsR' in V1 (RBBB)
-    v += gaussian(tInBeat, rCenter - 0.02, 0.018, p.rAmp * 0.4); // r
-    v += gaussian(tInBeat, rCenter, 0.02, -Math.abs(p.sAmp || 0.4)); // s
-    v += gaussian(tInBeat, rCenter + 0.035, 0.035, p.rAmp); // R' wide
-  } else if (p.isNotchedLbbb) {
-    // Broad notched R in I, V5, V6
-    v += gaussian(tInBeat, rCenter - 0.015, 0.03, p.rAmp * 0.85);
-    v += gaussian(tInBeat, rCenter + 0.025, 0.035, p.rAmp);
-  } else {
-    v += gaussian(tInBeat, rCenter, p.qrsWidth * 0.4, p.rAmp);
+  const W = p.qrsWidth || 0.08;
+  const qrsEnd = qrsStart + W;
+
+  // 3. QRS Complex: strictly compact on [qrsStart, qrsEnd]
+  if (tInBeat >= qrsStart && tInBeat <= qrsEnd) {
+    // A. Rabbit Ears (RBBB in V1: rsR')
+    if (p.hasRabbitEars) {
+      const tR1 = qrsStart + W * 0.20;
+      const tS = qrsStart + W * 0.40;
+      const tR2 = qrsStart + W * 0.75;
+      const r1Amp = p.rAmp * 0.45;
+      const sAmp = -Math.abs(p.sAmp || 0.35);
+      if (tInBeat <= tR1) return hermiteSegment(tInBeat, qrsStart, tR1, 0.0, r1Amp);
+      if (tInBeat <= tS) return hermiteSegment(tInBeat, tR1, tS, r1Amp, sAmp);
+      if (tInBeat <= tR2) return hermiteSegment(tInBeat, tS, tR2, sAmp, p.rAmp);
+      return hermiteSegment(tInBeat, tR2, qrsEnd, p.rAmp, p.stElev);
+    }
+
+    // B. Notched broad R (LBBB in I, aVL, V5, V6)
+    if (p.isNotchedLbbb) {
+      const tPeak1 = qrsStart + W * 0.32;
+      const tNotch = qrsStart + W * 0.50;
+      const tPeak2 = qrsStart + W * 0.72;
+      const notchAmp = p.rAmp * 0.78;
+      if (tInBeat <= tPeak1) return hermiteSegment(tInBeat, qrsStart, tPeak1, 0.0, p.rAmp * 0.90);
+      if (tInBeat <= tNotch) return hermiteSegment(tInBeat, tPeak1, tNotch, p.rAmp * 0.90, notchAmp);
+      if (tInBeat <= tPeak2) return hermiteSegment(tInBeat, tNotch, tPeak2, notchAmp, p.rAmp);
+      return hermiteSegment(tInBeat, tPeak2, qrsEnd, p.rAmp, p.stElev);
+    }
+
+    // C. WPW Delta Wave
+    if (p.hasDeltaWave) {
+      const tDelta = qrsStart + W * 0.30;
+      const tR = qrsStart + W * 0.65;
+      const tS = qrsStart + W * 0.85;
+      const dAmp = p.rAmp * 0.35;
+      const sAmp = p.sAmp ? -Math.abs(p.sAmp) : 0.0;
+      if (tInBeat <= tDelta) return hermiteSegment(tInBeat, qrsStart, tDelta, 0.0, dAmp);
+      if (tInBeat <= tR) return hermiteSegment(tInBeat, tDelta, tR, dAmp, p.rAmp);
+      if (tInBeat <= tS) return hermiteSegment(tInBeat, tR, tS, p.rAmp, sAmp);
+      return hermiteSegment(tInBeat, tS, qrsEnd, sAmp, p.stElev);
+    }
+
+    // D. Standard Sequential Q-R-S Progression (No Flank Swallowing)
+    const hasQ = Math.abs(p.qAmp) > 1e-4;
+    const hasS = Math.abs(p.sAmp) > 1e-4;
+    const qVal = -Math.abs(p.qAmp);
+    const rVal = p.rAmp;
+    const sVal = -Math.abs(p.sAmp);
+    const jVal = p.stElev;
+
+    if (hasQ && hasS) {
+      const tQ = qrsStart + W * 0.20;
+      const tR = qrsStart + W * 0.50;
+      const tS = qrsStart + W * 0.80;
+      if (tInBeat <= tQ) return hermiteSegment(tInBeat, qrsStart, tQ, 0.0, qVal);
+      if (tInBeat <= tR) return hermiteSegment(tInBeat, tQ, tR, qVal, rVal);
+      if (tInBeat <= tS) return hermiteSegment(tInBeat, tR, tS, rVal, sVal);
+      return hermiteSegment(tInBeat, tS, qrsEnd, sVal, jVal);
+    } else if (hasQ) {
+      const tQ = qrsStart + W * 0.25;
+      const tR = qrsStart + W * 0.65;
+      if (tInBeat <= tQ) return hermiteSegment(tInBeat, qrsStart, tQ, 0.0, qVal);
+      if (tInBeat <= tR) return hermiteSegment(tInBeat, tQ, tR, qVal, rVal);
+      return hermiteSegment(tInBeat, tR, qrsEnd, rVal, jVal);
+    } else if (hasS) {
+      const tR = qrsStart + W * 0.35;
+      const tS = qrsStart + W * 0.70;
+      if (tInBeat <= tR) return hermiteSegment(tInBeat, qrsStart, tR, 0.0, rVal);
+      if (tInBeat <= tS) return hermiteSegment(tInBeat, tR, tS, rVal, sVal);
+      return hermiteSegment(tInBeat, tS, qrsEnd, sVal, jVal);
+    } else {
+      const tR = qrsStart + W * 0.50;
+      if (tInBeat <= tR) return hermiteSegment(tInBeat, qrsStart, tR, 0.0, rVal);
+      return hermiteSegment(tInBeat, tR, qrsEnd, rVal, jVal);
+    }
   }
 
-  // 4. S wave
-  const sCenter = rCenter + 0.025;
-  if (p.sAmp !== 0 && !p.hasRabbitEars) {
-    v += gaussian(tInBeat, sCenter, p.qrsWidth * 0.35, -Math.abs(p.sAmp));
+  // 4. ST Segment & T Wave
+  const stDuration = 0.060;
+  const tOnset = qrsEnd + stDuration;
+  if (tInBeat < tOnset) {
+    return p.stElev; // Flat isoelectric or stable J-point deviation
   }
 
-  // 5. ST segment & J-point
-  const stCenter = rCenter + 0.08;
-  if (p.stElev !== 0) {
-    v += gaussian(tInBeat, stCenter, 0.08, p.stElev);
+  const tWidth = Math.max(0.08, p.tWidth || 0.16);
+  const tOffset = tOnset + tWidth;
+  if (tInBeat <= tOffset) {
+    // Asymmetric T wave peak (60% upstroke in normal, 50% in peaked hyperkalemia)
+    const skew = Math.abs(p.tAmp) > 0.9 ? 0.50 : 0.60;
+    const tPeak = tOnset + tWidth * skew;
+    if (tInBeat <= tPeak) {
+      return hermiteSegment(tInBeat, tOnset, tPeak, p.stElev, p.tAmp);
+    } else {
+      return hermiteSegment(tInBeat, tPeak, tOffset, p.tAmp, 0.0);
+    }
   }
 
-  // 6. T wave
-  const tCenter = qrsStart + p.qtInterval - 0.08;
-  v += gaussian(tInBeat, tCenter, p.tWidth, p.tAmp);
-
-  // 7. U wave (if present, e.g. hypokalemia or normal variant)
-  if (p.uAmp) {
-    v += gaussian(tInBeat, tCenter + 0.16, 0.06, p.uAmp);
+  // 5. U Wave (if present, e.g. severe hypokalemia)
+  if (p.uAmp && Math.abs(p.uAmp) > 1e-4) {
+    const uOnset = tOffset + 0.024;
+    const uDuration = 0.120;
+    const uPeak = uOnset + 0.060;
+    const uOffset = uOnset + uDuration;
+    if (tInBeat >= uOnset && tInBeat <= uOffset) {
+      if (tInBeat <= uPeak) {
+        return hermiteSegment(tInBeat, uOnset, uPeak, 0.0, p.uAmp);
+      } else {
+        return hermiteSegment(tInBeat, uPeak, uOffset, p.uAmp, 0.0);
+      }
+    }
   }
 
-  return v;
+  // 6. TP Segment: strictly 0.0000 mV until next beat
+  return 0.0;
+}
+
+/**
+ * Idioventricular escape beat generator for Complete Heart Block.
+ * Features broad QRS and secondary discordant T wave repolarization with true 0.0000 mV diastole.
+ */
+function generateEscapeQrs(tInQrs: number, lead: string): number {
+  const qrsStart = 0.120;
+  const W = 0.140;
+  const qrsEnd = qrsStart + W;
+
+  const isV1 = lead === 'V1';
+  const isLateral = lead === 'I' || lead === 'V5' || lead === 'V6';
+  const amp = isV1 ? -0.80 : (isLateral ? 0.90 : 0.60);
+
+  if (tInQrs >= qrsStart && tInQrs <= qrsEnd) {
+    const tPeak = qrsStart + W * 0.45;
+    if (tInQrs <= tPeak) {
+      return hermiteSegment(tInQrs, qrsStart, tPeak, 0.0, amp);
+    } else {
+      return hermiteSegment(tInQrs, tPeak, qrsEnd, amp, 0.0);
+    }
+  }
+
+  // Secondary T wave discordant with main QRS deflection
+  const tOnset = qrsEnd + 0.060;
+  const tWidth = 0.200;
+  const tPeak = tOnset + 0.110;
+  const tOffset = tOnset + tWidth;
+  const tAmp = -amp * 0.35;
+
+  if (tInQrs >= tOnset && tInQrs <= tOffset) {
+    if (tInQrs <= tPeak) {
+      return hermiteSegment(tInQrs, tOnset, tPeak, 0.0, tAmp);
+    } else {
+      return hermiteSegment(tInQrs, tPeak, tOffset, tAmp, 0.0);
+    }
+  }
+
+  // Strictly 0.0000 mV for the rest of diastole (0.52s to 1.76s)
+  return 0.0;
 }
 
 export function synthesizeLeadWaveform(preset: WaveformPresetKey): LeadMap {
@@ -219,24 +362,35 @@ export function synthesizeLeadWaveform(preset: WaveformPresetKey): LeadMap {
 
         for (const lead of LEADS) {
           const p = getAfibLeadParams(lead);
-          leadMap[lead][s] = generateSingleBeat(tInBeat, p) + (lead === 'V1' || lead === 'II' ? fWave * 1.5 : fWave);
+          // Scale T width if interval is short (e.g. 0.38s) so beat finishes cleanly without cliff jump
+          const scaledP = curInterval < 0.45 ? { ...p, tWidth: 0.12 } : p;
+          leadMap[lead][s] = generateSingleBeat(tInBeat, scaledP) + (lead === 'V1' || lead === 'II' ? fWave * 1.5 : fWave);
         }
-        leadMap['RHYTHM_II'][s] = generateSingleBeat(tInBeat, getAfibLeadParams('II')) + fWave * 1.5;
+        const pRhythm = getAfibLeadParams('II');
+        const scaledPRhythm = curInterval < 0.45 ? { ...pRhythm, tWidth: 0.12 } : pRhythm;
+        leadMap['RHYTHM_II'][s] = generateSingleBeat(tInBeat, scaledPRhythm) + fWave * 1.5;
       }
       break;
     }
 
     case 'ATRIAL_FLUTTER_2_1': {
       // Flutter waves at 300 bpm (every 0.20s), QRS every 0.40s (150 bpm)
+      const fPeriod = 0.20;
+      const tRise = 0.14; // Gradual 140 ms upstroke
       for (let s = 0; s < totalSamples; s++) {
         const t = s / samplingRateHz;
         const beatInterval = 0.40; // 150 bpm
         const beatIndex = Math.floor(t / beatInterval);
         const tInBeat = t - beatIndex * beatInterval;
 
-        // Saw-tooth wave (period 0.20s = 5 Hz)
-        const fPeriod = 0.20;
-        const sawTooth = 0.18 * (2 * ((t % fPeriod) / fPeriod) - 1);
+        // Continuous smooth asymmetric saw-tooth wave (period 0.20s = 5 Hz)
+        const tInPeriod = t % fPeriod;
+        let sawTooth: number;
+        if (tInPeriod <= tRise) {
+          sawTooth = hermiteSegment(tInPeriod, 0.0, tRise, -0.16, 0.16);
+        } else {
+          sawTooth = hermiteSegment(tInPeriod, tRise, fPeriod, 0.16, -0.16);
+        }
 
         for (const lead of LEADS) {
           const p = getAFlutterLeadParams(lead);
@@ -273,15 +427,23 @@ export function synthesizeLeadWaveform(preset: WaveformPresetKey): LeadMap {
 
       for (let s = 0; s < totalSamples; s++) {
         const t = s / samplingRateHz;
-        const pPhase = (t % pInterval) / pInterval;
-        const qrsPhase = (t % qrsInterval) / qrsInterval;
-        const tInP = pPhase * pInterval;
-        const tInQrs = qrsPhase * qrsInterval;
+        const tInP = t % pInterval;
+        const tInQrs = t % qrsInterval;
 
-        // Independent P wave
-        const pWave = gaussian(tInP, 0.10, 0.035, 0.16);
+        // Independent compact P wave
+        let pWave = 0.0;
+        const tP0 = 0.040;
+        const tP1 = 0.080;
+        const tP2 = 0.120;
+        if (tInP >= tP0 && tInP <= tP2) {
+          if (tInP <= tP1) {
+            pWave = hermiteSegment(tInP, tP0, tP1, 0.0, 0.16);
+          } else {
+            pWave = hermiteSegment(tInP, tP1, tP2, 0.16, 0.0);
+          }
+        }
 
-        // Independent Wide QRS Escape
+        // Independent Wide QRS Escape with Discordant T
         for (const lead of LEADS) {
           const qrsVal = generateEscapeQrs(tInQrs, lead);
           leadMap[lead][s] = qrsVal + (lead === 'II' ? pWave : pWave * 0.6);
@@ -395,7 +557,7 @@ export function synthesizeLeadWaveform(preset: WaveformPresetKey): LeadMap {
 
     case 'VENTRICULAR_TACHYCARDIA': {
       const hr = 165;
-      const beatInterval = 60 / hr;
+      const beatInterval = 60 / hr; // ~0.3636s
       for (let s = 0; s < totalSamples; s++) {
         const t = s / samplingRateHz;
         const beatIndex = Math.floor(t / beatInterval);
@@ -429,7 +591,7 @@ export function synthesizeLeadWaveform(preset: WaveformPresetKey): LeadMap {
 
     case 'PULMONARY_EMBOLISM': {
       const hr = 115;
-      const beatInterval = 60 / hr;
+      const beatInterval = 60 / hr; // ~0.5217s
       for (let s = 0; s < totalSamples; s++) {
         const t = s / samplingRateHz;
         const beatIndex = Math.floor(t / beatInterval);
@@ -503,18 +665,18 @@ export function synthesizeLeadWaveform(preset: WaveformPresetKey): LeadMap {
 // Parameter generators per lead
 function getNormalLeadParams(lead: string): WaveParams {
   switch (lead) {
-    case 'I': return { pAmp: 0.12, pWidth: 0.04, prInterval: 0.16, qAmp: 0.05, rAmp: 0.90, sAmp: 0.15, qrsWidth: 0.08, stElev: 0, tAmp: 0.28, tWidth: 0.08, qtInterval: 0.38 };
-    case 'II': return { pAmp: 0.18, pWidth: 0.04, prInterval: 0.16, qAmp: 0.04, rAmp: 1.30, sAmp: 0.10, qrsWidth: 0.08, stElev: 0, tAmp: 0.35, tWidth: 0.08, qtInterval: 0.38 };
-    case 'III': return { pAmp: 0.08, pWidth: 0.04, prInterval: 0.16, qAmp: 0.02, rAmp: 0.65, sAmp: 0.15, qrsWidth: 0.08, stElev: 0, tAmp: 0.12, tWidth: 0.08, qtInterval: 0.38 };
-    case 'aVR': return { pAmp: -0.15, pWidth: 0.04, prInterval: 0.16, qAmp: 0.60, rAmp: 0.15, sAmp: 0.00, qrsWidth: 0.08, stElev: 0, tAmp: -0.25, tWidth: 0.08, qtInterval: 0.38 };
-    case 'aVL': return { pAmp: 0.05, pWidth: 0.04, prInterval: 0.16, qAmp: 0.05, rAmp: 0.50, sAmp: 0.20, qrsWidth: 0.08, stElev: 0, tAmp: 0.15, tWidth: 0.08, qtInterval: 0.38 };
-    case 'aVF': return { pAmp: 0.14, pWidth: 0.04, prInterval: 0.16, qAmp: 0.03, rAmp: 0.95, sAmp: 0.12, qrsWidth: 0.08, stElev: 0, tAmp: 0.26, tWidth: 0.08, qtInterval: 0.38 };
-    case 'V1': return { pAmp: 0.06, pWidth: 0.04, prInterval: 0.16, qAmp: 0.00, rAmp: 0.25, sAmp: 0.95, qrsWidth: 0.08, stElev: 0, tAmp: 0.10, tWidth: 0.08, qtInterval: 0.38 };
-    case 'V2': return { pAmp: 0.10, pWidth: 0.04, prInterval: 0.16, qAmp: 0.00, rAmp: 0.55, sAmp: 1.30, qrsWidth: 0.08, stElev: 0, tAmp: 0.35, tWidth: 0.08, qtInterval: 0.38 };
-    case 'V3': return { pAmp: 0.12, pWidth: 0.04, prInterval: 0.16, qAmp: 0.02, rAmp: 0.90, sAmp: 0.90, qrsWidth: 0.08, stElev: 0, tAmp: 0.45, tWidth: 0.08, qtInterval: 0.38 };
-    case 'V4': return { pAmp: 0.14, pWidth: 0.04, prInterval: 0.16, qAmp: 0.04, rAmp: 1.40, sAmp: 0.50, qrsWidth: 0.08, stElev: 0, tAmp: 0.40, tWidth: 0.08, qtInterval: 0.38 };
-    case 'V5': return { pAmp: 0.13, pWidth: 0.04, prInterval: 0.16, qAmp: 0.05, rAmp: 1.50, sAmp: 0.25, qrsWidth: 0.08, stElev: 0, tAmp: 0.35, tWidth: 0.08, qtInterval: 0.38 };
-    case 'V6': return { pAmp: 0.11, pWidth: 0.04, prInterval: 0.16, qAmp: 0.06, rAmp: 1.20, sAmp: 0.10, qrsWidth: 0.08, stElev: 0, tAmp: 0.28, tWidth: 0.08, qtInterval: 0.38 };
+    case 'I': return { pAmp: 0.12, pWidth: 0.08, prInterval: 0.16, qAmp: 0.05, rAmp: 0.90, sAmp: 0.15, qrsWidth: 0.08, stElev: 0, tAmp: 0.28, tWidth: 0.16, qtInterval: 0.38 };
+    case 'II': return { pAmp: 0.18, pWidth: 0.08, prInterval: 0.16, qAmp: 0.04, rAmp: 1.30, sAmp: 0.10, qrsWidth: 0.08, stElev: 0, tAmp: 0.35, tWidth: 0.16, qtInterval: 0.38 };
+    case 'III': return { pAmp: 0.08, pWidth: 0.08, prInterval: 0.16, qAmp: 0.02, rAmp: 0.65, sAmp: 0.15, qrsWidth: 0.08, stElev: 0, tAmp: 0.12, tWidth: 0.16, qtInterval: 0.38 };
+    case 'aVR': return { pAmp: -0.15, pWidth: 0.08, prInterval: 0.16, qAmp: 0.60, rAmp: 0.15, sAmp: 0.00, qrsWidth: 0.08, stElev: 0, tAmp: -0.25, tWidth: 0.16, qtInterval: 0.38 };
+    case 'aVL': return { pAmp: 0.05, pWidth: 0.08, prInterval: 0.16, qAmp: 0.05, rAmp: 0.50, sAmp: 0.20, qrsWidth: 0.08, stElev: 0, tAmp: 0.15, tWidth: 0.16, qtInterval: 0.38 };
+    case 'aVF': return { pAmp: 0.14, pWidth: 0.08, prInterval: 0.16, qAmp: 0.03, rAmp: 0.95, sAmp: 0.12, qrsWidth: 0.08, stElev: 0, tAmp: 0.26, tWidth: 0.16, qtInterval: 0.38 };
+    case 'V1': return { pAmp: 0.06, pWidth: 0.08, prInterval: 0.16, qAmp: 0.00, rAmp: 0.25, sAmp: 0.95, qrsWidth: 0.08, stElev: 0, tAmp: 0.10, tWidth: 0.16, qtInterval: 0.38 };
+    case 'V2': return { pAmp: 0.10, pWidth: 0.08, prInterval: 0.16, qAmp: 0.00, rAmp: 0.55, sAmp: 1.30, qrsWidth: 0.08, stElev: 0, tAmp: 0.35, tWidth: 0.16, qtInterval: 0.38 };
+    case 'V3': return { pAmp: 0.12, pWidth: 0.08, prInterval: 0.16, qAmp: 0.02, rAmp: 0.90, sAmp: 0.90, qrsWidth: 0.08, stElev: 0, tAmp: 0.45, tWidth: 0.16, qtInterval: 0.38 };
+    case 'V4': return { pAmp: 0.14, pWidth: 0.08, prInterval: 0.16, qAmp: 0.04, rAmp: 1.40, sAmp: 0.50, qrsWidth: 0.08, stElev: 0, tAmp: 0.40, tWidth: 0.16, qtInterval: 0.38 };
+    case 'V5': return { pAmp: 0.13, pWidth: 0.08, prInterval: 0.16, qAmp: 0.05, rAmp: 1.50, sAmp: 0.25, qrsWidth: 0.08, stElev: 0, tAmp: 0.35, tWidth: 0.16, qtInterval: 0.38 };
+    case 'V6': return { pAmp: 0.11, pWidth: 0.08, prInterval: 0.16, qAmp: 0.06, rAmp: 1.20, sAmp: 0.10, qrsWidth: 0.08, stElev: 0, tAmp: 0.28, tWidth: 0.16, qtInterval: 0.38 };
     default: return getNormalLeadParams('II');
   }
 }
@@ -542,7 +704,7 @@ function getAnteriorStemiLeadParams(lead: string): WaveParams {
     ...norm,
     prInterval: 0.14,
     qtInterval: 0.30,
-    tWidth: 0.055,
+    tWidth: 0.14,
   };
   if (lead === 'V1' || lead === 'V2') {
     return { ...base, qAmp: 0.35, rAmp: 0.20, sAmp: 0, stElev: 0.45, tAmp: 0.70 }; // Tombstone ST elevation
@@ -586,7 +748,7 @@ function getAfibLeadParams(lead: string): WaveParams {
     pAmp: 0, // Zero P wave
     prInterval: 0.10,
     qtInterval: 0.28,
-    tWidth: 0.055,
+    tWidth: 0.14,
   };
 }
 
@@ -597,7 +759,7 @@ function getAFlutterLeadParams(lead: string): WaveParams {
     pAmp: 0,
     prInterval: 0.08,
     qtInterval: 0.24,
-    tWidth: 0.045,
+    tWidth: 0.12,
   };
 }
 
@@ -609,22 +771,6 @@ function getWpwLeadParams(lead: string): WaveParams {
     qrsWidth: 0.13,   // Widened QRS
     hasDeltaWave: true,
   };
-}
-
-function generateEscapeQrs(tInQrs: number, lead: string): number {
-  // Broad, slow idioventricular escape (width 0.16s)
-  const qrsCenter = 0.20;
-  const isV1 = lead === 'V1';
-  const isLateral = lead === 'I' || lead === 'V5' || lead === 'V6';
-  const amp = isV1 ? -0.8 : (isLateral ? 0.9 : 0.6);
-  const qrs = gaussian(tInQrs, qrsCenter, 0.07, amp);
-
-  // Secondary T wave discordant with main QRS deflection
-  const tCenter = 0.52;
-  const tAmp = -amp * 0.35;
-  const tWave = gaussian(tInQrs, tCenter, 0.10, tAmp);
-
-  return qrs + tWave;
 }
 
 function getRbbbLeadParams(lead: string): WaveParams {
@@ -654,10 +800,10 @@ function getHyperkalemiaLeadParams(lead: string): WaveParams {
   // Flattened P wave, wide QRS, massive tented T wave
   return {
     ...norm,
-    pAmp: 0.04,
+    pAmp: 0.03,
     qrsWidth: 0.13,
-    tAmp: lead.startsWith('V') ? 1.10 : 0.65, // Tented peak
-    tWidth: 0.045, // Narrow base tenting
+    tAmp: lead.startsWith('V') ? 1.15 : 0.70, // Tented peak
+    tWidth: 0.09, // Narrow base tenting
   };
 }
 
@@ -711,7 +857,7 @@ function getVentricularTachycardiaLeadParams(lead: string): WaveParams {
     qrsWidth: 0.14, // Broad bizarre QRS
     stElev: isInferior ? 0.20 : -0.15,
     tAmp: isInferior ? -0.45 : (isV1 ? 0.40 : -0.35),
-    tWidth: 0.05,
+    tWidth: 0.10,
     qtInterval: 0.24,
   };
 }
@@ -739,7 +885,7 @@ function getPulmonaryEmbolismLeadParams(lead: string): WaveParams {
     ...norm,
     prInterval: 0.14,
     qtInterval: 0.28,
-    tWidth: 0.05,
+    tWidth: 0.12,
   };
   if (lead === 'I') {
     return { ...base, rAmp: 0.45, sAmp: 0.75 }; // Prominent S in I
@@ -760,10 +906,10 @@ function getBrugadaType1LeadParams(lead: string): WaveParams {
   const norm = getNormalLeadParams(lead);
   if (lead === 'V1') {
     // Classic coved ST elevation >= 2mm followed by negative T wave
-    return { ...norm, rAmp: 0.38, sAmp: 0.10, stElev: 0.28, tAmp: -0.34, tWidth: 0.06 };
+    return { ...norm, rAmp: 0.38, sAmp: 0.10, stElev: 0.28, tAmp: -0.34, tWidth: 0.14 };
   }
   if (lead === 'V2') {
-    return { ...norm, rAmp: 0.48, sAmp: 0.18, stElev: 0.25, tAmp: -0.30, tWidth: 0.06 };
+    return { ...norm, rAmp: 0.48, sAmp: 0.18, stElev: 0.25, tAmp: -0.30, tWidth: 0.14 };
   }
   return norm;
 }
@@ -776,7 +922,7 @@ function getSevereHypokalemiaLeadParams(lead: string): WaveParams {
     qtInterval: 0.32,
     stElev: -0.11, // Diffuse mild ST depression
     tAmp: 0.04,    // Severely flattened T wave
-    tWidth: 0.045,
+    tWidth: 0.10,
     uAmp: isMidPrecordial ? 0.28 : 0.18, // Huge prominent U wave
   };
 }

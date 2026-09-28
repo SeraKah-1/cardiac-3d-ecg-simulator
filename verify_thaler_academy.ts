@@ -61,7 +61,7 @@ function runThalerVerification() {
   assert(ROW_BASELINES_PX[0] === 125, `Row 0 baseline locked to bold grid line at 125 px (25 mm)`);
   assert(ROW_BASELINES_PX[1] === 350, `Row 1 baseline locked to bold grid line at 350 px (70 mm)`);
   assert(ROW_BASELINES_PX[2] === 575, `Row 2 baseline locked to bold grid line at 575 px (115 mm)`);
-  assert(RHYTHM_BASELINE_PX === 820, `Rhythm baseline locked to bold grid line at 820 px (164 mm)`);
+  assert(RHYTHM_BASELINE_PX === 825, `Rhythm baseline locked to bold grid line at 825 px (165 mm)`);
 
   // Test wave feature geometry generator
   const pWaveGeom = getWaveFeatureGeometry('II', 'P_WAVE', 75, 160, 80, 0);

@@ -237,7 +237,7 @@ export const ThalerEcgCanvas: React.FC<ThalerEcgCanvasProps> = ({
     // 6. Draw Continuous Rhythm Strip (Lead II) Across Full Signal Width
     const rhythmSamples = currentCase.leadSamples['RHYTHM_II'] || currentCase.leadSamples['II'];
     if (rhythmSamples && rhythmSamples.length > 0) {
-      const rhythmBaselineY = RHYTHM_BASELINE_PX; // Exactly 820 px
+      const rhythmBaselineY = RHYTHM_BASELINE_PX; // Exactly 825 px (33rd bold 5mm line)
       const rhythmPxPerSample = SIGNAL_WIDTH_PX / rhythmSamples.length; // Exactly 0.5000 px/sample!
 
       const isRhythmFocused =

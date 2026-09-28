@@ -23,7 +23,7 @@ export const RHYTHM_TOP_Y_PX = CANVAS_HEIGHT_PX - 36 * PX_PER_MM; // 720 px
 
 // Exactly aligned row baselines on 5mm bold grid lines
 export const ROW_BASELINES_PX = [125.0, 350.0, 575.0]; // Rows 0, 1, 2 baselines
-export const RHYTHM_BASELINE_PX = 820.0; // Rhythm row baseline
+export const RHYTHM_BASELINE_PX = 825.0; // Rhythm row baseline (33rd 5mm bold grid line at 165 mm)
 
 // Lead Column and Row indices in 4x3 standard grid
 export const LEAD_MATRIX: Record<string, { col: number; row: number }> = {
